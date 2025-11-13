@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { FieldPalette } from '@/components/forms/field-palette'
 import { FieldBuilder } from '@/components/forms/field-builder'
 import { FieldSettings } from '@/components/forms/field-settings'
+import { FormPreview } from '@/components/forms/form-preview'
 import { useFormBuilder } from '@/hooks/use-form-builder'
 import { FormBuilderState } from '@/types/form-builder'
 import { cn } from '@/lib/utils'
@@ -23,6 +24,7 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   const {
     state,
@@ -78,7 +80,12 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowPreview(true)}
+            >
               <Eye className="h-4 w-4" />
               Visualizar
             </Button>
@@ -132,6 +139,13 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
           onUpdate={updateField}
         />
       </div>
+
+      {/* Form Preview Dialog */}
+      <FormPreview
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        formState={state}
+      />
     </div>
   )
 }
