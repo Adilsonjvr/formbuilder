@@ -25,6 +25,16 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/debug', (_req, res) => {
+  res.json({
+    env: process.env.NODE_ENV,
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    hasJwtAccess: !!process.env.JWT_ACCESS_TOKEN_SECRET,
+    hasJwtRefresh: !!process.env.JWT_REFRESH_TOKEN_SECRET,
+    hasFrontendUrl: !!process.env.FRONTEND_URL,
+  });
+});
+
 app.use('/auth', authRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/forms', formsRouter);
