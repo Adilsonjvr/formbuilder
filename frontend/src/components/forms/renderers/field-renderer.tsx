@@ -211,11 +211,15 @@ export function FieldRenderer({
         )
 
       case 'FILE':
+        // Dynamic import to avoid SSR issues
+        const FileUpload = require('@/components/forms/file-upload').FileUpload
         return (
-          <Input
-            type="file"
-            onChange={(e) => onChange(e.target.files?.[0])}
-            required={field.required}
+          <FileUpload
+            value={value}
+            onChange={onChange}
+            accept={field.validation?.pattern}
+            maxSize={field.validation?.maxLength || 10}
+            error={error}
           />
         )
 

@@ -244,6 +244,56 @@ export function FieldSettings({
             </div>
           )}
 
+          {/* File Upload Settings */}
+          {localField.type === 'FILE' && (
+            <div className="space-y-4">
+              <Label>Configurações de Upload</Label>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="file-accept" className="text-xs">
+                    Tipos de Arquivo Aceitos
+                  </Label>
+                  <Input
+                    id="file-accept"
+                    value={localField.validation?.pattern || ''}
+                    onChange={(e) =>
+                      handleUpdate({
+                        validation: {
+                          ...localField.validation,
+                          pattern: e.target.value || undefined,
+                        },
+                      })
+                    }
+                    placeholder="Ex: image/*, .pdf, .doc"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use MIME types (image/*, video/*) ou extensões (.pdf, .doc)
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="file-maxsize" className="text-xs">
+                    Tamanho Máximo (MB)
+                  </Label>
+                  <Input
+                    id="file-maxsize"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={localField.validation?.maxLength || 10}
+                    onChange={(e) =>
+                      handleUpdate({
+                        validation: {
+                          ...localField.validation,
+                          maxLength: parseInt(e.target.value) || 10,
+                        },
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Done Button */}
           <div className="pt-4 border-t">
             <Button

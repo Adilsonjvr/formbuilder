@@ -3,7 +3,7 @@
 import { use, useState } from 'react'
 import { motion } from 'framer-motion'
 import useSWR from 'swr'
-import { ArrowLeft, Download, Eye, Trash2 } from 'lucide-react'
+import { ArrowLeft, Download, Eye, Trash2, BarChart3, List } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -16,8 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ResponseAnalytics } from '@/components/analytics/response-analytics'
 import { fadeIn, staggerContainer, transitions } from '@/lib/motion'
 import { FormField } from '@/types/form-builder'
 
@@ -168,13 +170,12 @@ export default function ResponsesPage({ params }: PageProps) {
 
       {/* Content */}
       <div className="container p-8">
-        <motion.div
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-          className="space-y-6"
-        >
-          {form.responses.length === 0 ? (
+        {form.responses.length === 0 ? (
+          <motion.div
+            variants={fadeIn}
+            initial="initial"
+            animate="animate"
+          >
             <motion.div variants={fadeIn}>
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -198,9 +199,22 @@ export default function ResponsesPage({ params }: PageProps) {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
-          ) : (
-            <motion.div variants={fadeIn}>
+            </Card>
+          </motion.div>
+        ) : (
+          <Tabs defaultValue="list" className="space-y-6">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="list" className="gap-2">
+                <List className="h-4 w-4" />
+                Lista de Respostas
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Analytics
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="list" className="space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle>Respostas</CardTitle>
@@ -272,10 +286,15 @@ export default function ResponsesPage({ params }: PageProps) {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
-          )}
+            </TabsContent>
 
-          {/* Response Detail Modal */}
+            <TabsContent value="analytics" className="space-y-4">
+              <ResponseAnalytics fields={sortedFields} responses={form.responses} />
+            </TabsContent>
+          </Tabs>
+        )}
+
+        {/* Response Detail Modal */}
           {selectedResponse && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -344,7 +363,6 @@ export default function ResponsesPage({ params }: PageProps) {
               </motion.div>
             </motion.div>
           )}
-        </motion.div>
       </div>
     </div>
   )
