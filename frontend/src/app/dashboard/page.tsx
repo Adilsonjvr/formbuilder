@@ -30,7 +30,7 @@ interface FormsResponse {
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { data, error, isLoading } = useSWR<FormsResponse>('/forms', () =>
+  const { data, error, isLoading, mutate } = useSWR<FormsResponse>('/forms', () =>
     api('/forms')
   )
 
@@ -39,17 +39,38 @@ export default function DashboardPage() {
   }
 
   const handleViewResponses = (formId: string) => {
-    router.push(`/forms/${formId}/responses`)
+    router.push(`/responses/${formId}`)
   }
 
   const handleShare = (formId: string) => {
-    // TODO: Implement share functionality
-    console.log('Share form:', formId)
+    const publicUrl = `${window.location.origin}/forms/${formId}`
+    navigator.clipboard.writeText(publicUrl)
+
+    // Simple toast notification (you could use a proper toast library)
+    const toast = document.createElement('div')
+    toast.textContent = 'Link copiado para a área de transferência!'
+    toast.className = 'fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg z-50 animate-in slide-in-from-bottom'
+    document.body.appendChild(toast)
+    setTimeout(() => {
+      toast.remove()
+    }, 3000)
   }
 
   const handleDelete = async (formId: string) => {
-    // TODO: Implement delete functionality with confirmation dialog
-    console.log('Delete form:', formId)
+    if (!confirm('Tem certeza que deseja excluir este formulário? Esta ação não pode ser desfeita.')) {
+      return
+    }
+
+    try {
+      await api(`/forms/${formId}`, {
+        method: 'DELETE',
+      })
+      // Revalidate data after deletion
+      mutate()
+    } catch (error) {
+      console.error('Error deleting form:', error)
+      alert('Erro ao excluir formulário. Tente novamente.')
+    }
   }
 
   const handleCreateNew = () => {
