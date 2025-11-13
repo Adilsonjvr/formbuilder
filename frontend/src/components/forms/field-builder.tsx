@@ -1,10 +1,12 @@
 'use client'
 
+import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { FormField } from '@/types/form-builder'
 import { FieldType } from '@/lib/constants'
 import { FieldItem } from './field-item'
 import { FileText } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface FieldBuilderProps {
   fields: FormField[]
@@ -25,11 +27,21 @@ export function FieldBuilder({
   onRemoveField,
   onDuplicateField,
 }: FieldBuilderProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: 'form-builder-canvas',
+  })
+
   return (
     <div className="flex-1 bg-background p-8 overflow-y-auto">
       <div className="max-w-3xl mx-auto">
         {fields.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[500px] text-center border-2 border-dashed rounded-lg p-12">
+          <div
+            ref={setNodeRef}
+            className={cn(
+              'flex flex-col items-center justify-center min-h-[500px] text-center border-2 border-dashed rounded-lg p-12 transition-colors',
+              isOver && 'border-primary bg-primary/5'
+            )}
+          >
             <div className="p-4 rounded-full bg-muted mb-4">
               <FileText className="h-12 w-12 text-muted-foreground" />
             </div>

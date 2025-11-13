@@ -33,7 +33,6 @@ interface BuilderLayoutProps {
 export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -72,7 +71,6 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
 
   const handleSelectField = (fieldId: string) => {
     setActiveField(fieldId)
-    setShowSettings(true)
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -192,10 +190,7 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
           {/* Field Settings - Right Panel (Sheet) */}
           <FieldSettings
             field={activeField || null}
-            onClose={() => {
-              setActiveField(null)
-              setShowSettings(false)
-            }}
+            onClose={() => setActiveField(null)}
             onUpdate={updateField}
           />
         </div>

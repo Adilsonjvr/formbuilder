@@ -243,6 +243,18 @@ export function FieldSettings({
               </div>
             </div>
           )}
+
+          {/* Done Button */}
+          <div className="pt-4 border-t">
+            <Button
+              type="button"
+              onClick={onClose}
+              className="w-full"
+              size="lg"
+            >
+              Concluído
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
