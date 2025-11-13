@@ -199,7 +199,6 @@ export default function ResponsesPage({ params }: PageProps) {
                   </Button>
                 </CardContent>
               </Card>
-            </Card>
           </motion.div>
         ) : (
           <Tabs defaultValue="list" className="space-y-6">
