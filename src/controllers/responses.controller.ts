@@ -1,11 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import rateLimit from 'express-rate-limit';
 import { authMiddleware, AuthRequest } from '../middlewares/auth.middleware';
 import { AppError } from '../utils/AppError';
 import logger from '../utils/logger';
-
-const prisma = new PrismaClient();
 
 const publicLimiter = rateLimit({
   windowMs: 60 * 1000,

@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import { AddFormFieldDTO } from '../dtos/field.dto';
@@ -7,7 +7,6 @@ import { AppError } from '../utils/AppError';
 import logger from '../utils/logger';
 
 const router = Router({ mergeParams: true });
-const prisma = new PrismaClient();
 
 router.post('/', authMiddleware, validate(AddFormFieldDTO), async (req: AuthRequest, res: Response) => {
   const { id: formId } = req.params as { id: string };

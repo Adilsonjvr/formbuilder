@@ -1,12 +1,11 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import { CreateFormDTO } from '../dtos/form.dto';
 import logger from '../utils/logger';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 router.post('/', authMiddleware, validate(CreateFormDTO), async (req: AuthRequest, res: Response) => {
   const { name, description } = req.body;
