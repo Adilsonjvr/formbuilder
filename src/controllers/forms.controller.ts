@@ -98,7 +98,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   const { name, description } = req.body;
 
   const form = await prisma.form.findFirst({
-    where: { id: id, userId: req.user!.id, deletedAt: null },
+    where: { id, userId: req.user!.id, deletedAt: null },
   });
 
   if (!form) {
@@ -124,7 +124,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) =>
   const { id } = req.params;
 
   const form = await prisma.form.findFirst({
-    where: { id: id, userId: req.user!.id, deletedAt: null },
+    where: { id, userId: req.user!.id, deletedAt: null },
   });
 
   if (!form) {

@@ -6,3 +6,13 @@ dist
 .env.development.local
 .env.test.local
 .env.production.local
+.vercel
+
+# TypeScript build output from frontend
+frontend/**/*.d.ts
+frontend/**/*.d.ts.map
+frontend/**/*.js
+frontend/**/*.js.map
+!frontend/next.config.js
+!frontend/postcss.config.mjs
+!frontend/eslint.config.mjs
