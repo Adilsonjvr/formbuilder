@@ -6,12 +6,20 @@ export interface AuthRequest extends Request {
 }
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
+  // Try to get token from cookie first, then from Authorization header
+  let token = req.cookies?.accessToken;
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+  }
+
+  if (!token) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  const token = authHeader.substring(7);
   try {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET as string) as {
       userId: string;
