@@ -1,7 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { DndContext } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core'
 import { Save, Eye, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -13,6 +22,7 @@ import { FieldSettings } from '@/components/forms/field-settings'
 import { FormPreview } from '@/components/forms/form-preview'
 import { useFormBuilder } from '@/hooks/use-form-builder'
 import { FormBuilderState } from '@/types/form-builder'
+import { FieldType } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface BuilderLayoutProps {
@@ -25,6 +35,7 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
   const [saving, setSaving] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
 
   const {
     state,
@@ -37,6 +48,14 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
     setActiveField,
     getField,
   } = useFormBuilder(initialState)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  )
 
   const activeField = state.activeFieldId ? getField(state.activeFieldId) : null
 
@@ -55,6 +74,41 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
     setActiveField(fieldId)
     setShowSettings(true)
   }
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id as string)
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    setActiveId(null)
+
+    if (!over) return
+
+    // Handle drop from palette
+    if (active.data.current?.type === 'palette') {
+      const fieldType = active.data.current.fieldType as FieldType
+      let index = state.fields.length
+
+      // Find index if dropped over a field
+      if (over.data.current?.index !== undefined) {
+        index = over.data.current.index
+      }
+
+      addField(fieldType, index)
+      return
+    }
+
+    // Handle reordering
+    if (active.id !== over.id && active.data.current?.index !== undefined) {
+      const oldIndex = active.data.current.index
+      const newIndex = over.data.current?.index ?? state.fields.length - 1
+
+      reorderFields(oldIndex, newIndex)
+    }
+  }
+
+  const draggedField = state.fields.find((f) => f.id === activeId)
 
   return (
     <div className="flex flex-col h-screen">
@@ -114,31 +168,46 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
       </header>
 
       {/* Builder Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Field Palette - Left Sidebar */}
-        <FieldPalette />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex flex-1 overflow-hidden">
+          {/* Field Palette - Left Sidebar */}
+          <FieldPalette />
 
-        {/* Canvas - Center */}
-        <FieldBuilder
-          fields={state.fields}
-          activeFieldId={state.activeFieldId}
-          onAddField={addField}
-          onReorderFields={reorderFields}
-          onSelectField={handleSelectField}
-          onRemoveField={removeField}
-          onDuplicateField={duplicateField}
-        />
+          {/* Canvas - Center */}
+          <FieldBuilder
+            fields={state.fields}
+            activeFieldId={state.activeFieldId}
+            onAddField={addField}
+            onReorderFields={reorderFields}
+            onSelectField={handleSelectField}
+            onRemoveField={removeField}
+            onDuplicateField={duplicateField}
+          />
 
-        {/* Field Settings - Right Panel (Sheet) */}
-        <FieldSettings
-          field={activeField || null}
-          onClose={() => {
-            setActiveField(null)
-            setShowSettings(false)
-          }}
-          onUpdate={updateField}
-        />
-      </div>
+          {/* Field Settings - Right Panel (Sheet) */}
+          <FieldSettings
+            field={activeField || null}
+            onClose={() => {
+              setActiveField(null)
+              setShowSettings(false)
+            }}
+            onUpdate={updateField}
+          />
+        </div>
+
+        <DragOverlay>
+          {draggedField ? (
+            <div className="bg-card border-2 border-primary rounded-lg p-4 shadow-lg">
+              <p className="font-medium">{draggedField.label}</p>
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Form Preview Dialog */}
       <FormPreview

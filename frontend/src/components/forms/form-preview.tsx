@@ -3,7 +3,13 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FieldRenderer } from './renderers/field-renderer'
@@ -28,17 +34,19 @@ export function FormPreview({ open, onClose, formState }: FormPreviewProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0">
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background">
+        <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between p-4 border-b bg-background">
           <div>
-            <h3 className="text-lg font-semibold">Visualização do Formulário</h3>
-            <p className="text-sm text-muted-foreground">
+            <DialogTitle className="text-lg font-semibold">
+              Visualização do Formulário
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
               Veja como seu formulário aparecerá para os usuários
-            </p>
+            </DialogDescription>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
           </Button>
-        </div>
+        </DialogHeader>
 
         <div className="p-8 bg-muted/30">
           <motion.div
