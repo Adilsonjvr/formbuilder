@@ -34,6 +34,12 @@ export default function DashboardPage() {
     api('/api/forms')
   )
 
+  // Redirect to login if unauthorized
+  if (error && error.message.includes('Unauthorized')) {
+    router.push('/login')
+    return null
+  }
+
   const handleEdit = (formId: string) => {
     router.push(`/builder/${formId}`)
   }
@@ -62,7 +68,7 @@ export default function DashboardPage() {
     }
 
     try {
-      await api(`/forms/${formId}`, {
+      await api(`/api/forms/${formId}`, {
         method: 'DELETE',
       })
       // Revalidate data after deletion
