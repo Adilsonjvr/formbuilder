@@ -112,7 +112,7 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
     <div className="flex flex-col h-screen">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container flex items-center justify-between h-16 px-6">
+        <div className="container flex items-center justify-between h-18 px-6 md:px-8 lg:px-12">
           <div className="flex items-center gap-4 flex-1">
             <Button
               variant="ghost"
@@ -154,7 +154,7 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
         </div>
 
         {/* Form Description */}
-        <div className="container px-6 pb-4">
+        <div className="container px-6 md:px-8 lg:px-12 pb-4">
           <Textarea
             value={state.description}
             onChange={(e) => updateFormInfo({ description: e.target.value })}

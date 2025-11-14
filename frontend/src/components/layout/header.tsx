@@ -34,16 +34,16 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-6">
+      <div className="container flex h-18 items-center justify-between px-6 md:px-8 lg:px-12">
         <div className="flex items-center gap-6">
           <Link href="/dashboard" prefetch={false} className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <FileText className="h-4 w-4" />
             </div>
-            <span className="text-lg font-semibold">FormBuilder</span>
+            <span className="text-xl font-semibold">FormBuilder</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-4 text-sm">
+          <nav className="hidden md:flex items-center gap-6 text-base">
             <Link
               href="/dashboard"
               prefetch={false}
@@ -61,12 +61,12 @@ export function Header() {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
                 <User className="h-5 w-5" />
                 <span className="sr-only">Menu do usuário</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48" sideOffset={8}>
+            <DropdownMenuContent align="end" className="w-56" sideOffset={8}>
               <DropdownMenuItem disabled>
                 <User className="mr-2 h-4 w-4" />
                 Minha Conta

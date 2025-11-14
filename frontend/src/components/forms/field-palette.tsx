@@ -43,15 +43,15 @@ function FieldPaletteItem({ fieldType }: FieldPaletteItemProps) {
       {...listeners}
       {...attributes}
       className={cn(
-        'flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent hover:border-primary/50 cursor-grab active:cursor-grabbing transition-colors',
+        'flex items-start gap-3 p-4 rounded-lg border bg-card hover:bg-accent hover:border-primary/50 cursor-grab active:cursor-grabbing transition-colors',
         isDragging && 'shadow-lg'
       )}
     >
-      <div className="flex-shrink-0 p-2 rounded-md bg-primary/10 text-primary">
+      <div className="flex-shrink-0 p-2.5 rounded-md bg-primary/10 text-primary">
         {Icon && <Icon className="h-4 w-4" />}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium leading-none mb-1">
+        <p className="text-sm font-medium leading-none mb-1.5">
           {FIELD_LABELS[fieldType]}
         </p>
         <p className="text-xs text-muted-foreground line-clamp-2">
@@ -81,7 +81,7 @@ export function FieldPalette() {
               ]
             }
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {fields.map((fieldType) => (
               <FieldPaletteItem key={fieldType} fieldType={fieldType} />
             ))}

@@ -85,12 +85,12 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[500px]">
         <div className="text-center">
           <p className="text-lg font-medium text-destructive">
             Erro ao carregar formulários
           </p>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground text-base">
             Tente novamente mais tarde
           </p>
         </div>
@@ -99,12 +99,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container pt-16 pb-12 space-y-10">
+    <div className="container max-w-7xl py-8 px-6 md:px-8 lg:px-12 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between gap-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Meus Formulários</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Meus Formulários</h1>
+          <p className="text-muted-foreground text-base">
             Gerencie e acompanhe seus formulários
           </p>
         </div>
@@ -120,10 +120,10 @@ export default function DashboardPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="space-y-3">
-              <Skeleton className="h-[200px] w-full rounded-xl" />
+              <Skeleton className="h-[220px] w-full rounded-xl" />
             </div>
           ))}
         </div>
@@ -135,15 +135,15 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={transitions.base}
-          className="flex flex-col items-center justify-center min-h-[400px] text-center"
+          className="flex flex-col items-center justify-center min-h-[500px] text-center"
         >
           <div className="p-4 rounded-full bg-muted mb-4">
             <FileText className="h-12 w-12 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">
+          <h3 className="text-2xl font-semibold mb-3">
             Nenhum formulário ainda
           </h3>
-          <p className="text-muted-foreground mb-6 max-w-sm">
+          <p className="text-muted-foreground mb-8 max-w-md text-base">
             Crie seu primeiro formulário e comece a coletar respostas
           </p>
           <Button size="lg" onClick={handleCreateNew} className="gap-2">
@@ -159,7 +159,7 @@ export default function DashboardPage() {
           variants={staggerContainer}
           initial="initial"
           animate="animate"
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
         >
           <AnimatePresence>
             {data.items.map((form) => (

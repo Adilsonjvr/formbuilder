@@ -79,16 +79,16 @@ export function FormCard({
       className="h-full"
     >
       <Card className="h-full flex flex-col transition-all duration-200 hover:border-primary/20 cursor-pointer">
-        <CardHeader className="flex-row items-start justify-between space-y-0 pb-3">
+        <CardHeader className="flex-row items-start justify-between space-y-0 pb-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+            <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
               <FileText className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-semibold truncate">
+              <CardTitle className="text-lg font-semibold truncate mb-1.5">
                 {name}
               </CardTitle>
-              <CardDescription className="text-sm mt-1 line-clamp-2">
+              <CardDescription className="text-sm line-clamp-2 leading-relaxed">
                 {description || 'Sem descrição'}
               </CardDescription>
             </div>
@@ -148,7 +148,7 @@ export function FormCard({
           </DropdownMenu>
         </CardHeader>
 
-        <CardContent className="flex-1 pb-3">
+        <CardContent className="flex-1 py-4">
           <div className="flex items-center gap-2 flex-wrap">
             <Badge
               variant={statusVariant[status]}
@@ -166,7 +166,7 @@ export function FormCard({
           </div>
         </CardContent>
 
-        <CardFooter className="pt-3 border-t">
+        <CardFooter className="pt-4 border-t">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Calendar className="h-3.5 w-3.5" />
             <span>Criado em {formattedDate}</span>

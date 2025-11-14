@@ -38,17 +38,17 @@ export function FieldBuilder({
           <div
             ref={setNodeRef}
             className={cn(
-              'flex flex-col items-center justify-center min-h-[500px] text-center border-2 border-dashed rounded-lg p-12 transition-colors',
+              'flex flex-col items-center justify-center min-h-[520px] text-center border-2 border-dashed rounded-xl p-16 transition-colors',
               isOver && 'border-primary bg-primary/5'
             )}
           >
-            <div className="p-4 rounded-full bg-muted mb-4">
-              <FileText className="h-12 w-12 text-muted-foreground" />
+            <div className="p-5 rounded-full bg-muted mb-6">
+              <FileText className="h-14 w-14 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">
+            <h3 className="text-xl font-semibold mb-3">
               Comece criando seu formulário
             </h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
+            <p className="text-base text-muted-foreground max-w-md">
               Arraste campos da barra lateral para começar a construir seu
               formulário
             </p>
@@ -58,7 +58,7 @@ export function FieldBuilder({
             items={fields.map((f) => f.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-4">
+            <div className="space-y-5">
               {fields.map((field, index) => (
                 <FieldItem
                   key={field.id}

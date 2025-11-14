@@ -66,7 +66,7 @@ export function FieldSettings({
 
   return (
     <Sheet open={!!field} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-96 overflow-y-auto">
+      <SheetContent className="w-full sm:w-[480px] lg:w-[540px] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Configurar Campo</SheetTitle>
           <SheetDescription>
@@ -74,9 +74,9 @@ export function FieldSettings({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-8 space-y-8 px-2">
           {/* Label */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Label htmlFor="field-label">Label do Campo</Label>
             <Input
               id="field-label"
@@ -90,7 +90,7 @@ export function FieldSettings({
           {!['CHECKBOX', 'RADIO', 'RATING', 'NPS'].includes(
             localField.type
           ) && (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <Label htmlFor="field-placeholder">Placeholder</Label>
               <Input
                 id="field-placeholder"
@@ -102,7 +102,7 @@ export function FieldSettings({
           )}
 
           {/* Help Text */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Label htmlFor="field-help">Texto de Ajuda</Label>
             <Textarea
               id="field-help"
@@ -130,7 +130,7 @@ export function FieldSettings({
 
           {/* Options for SELECT, RADIO, CHECKBOX */}
           {showOptions && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label>Opções</Label>
                 <Button
@@ -144,7 +144,7 @@ export function FieldSettings({
                   Adicionar
                 </Button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {(localField.options || []).map((option, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
@@ -170,7 +170,7 @@ export function FieldSettings({
           {/* Min/Max for NUMBER, RATING, NPS */}
           {showMinMax && (
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label htmlFor="field-min">
                   {localField.type === 'NUMBER' ? 'Mínimo' : 'Min'}
                 </Label>
@@ -183,7 +183,7 @@ export function FieldSettings({
                   }
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label htmlFor="field-max">
                   {localField.type === 'NUMBER' ? 'Máximo' : 'Max'}
                 </Label>
@@ -204,7 +204,7 @@ export function FieldSettings({
             <div className="space-y-4">
               <Label>Validação</Label>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <Label htmlFor="field-minlength" className="text-xs">
                     Mín. Caracteres
                   </Label>
@@ -222,7 +222,7 @@ export function FieldSettings({
                     }
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <Label htmlFor="field-maxlength" className="text-xs">
                     Máx. Caracteres
                   </Label>
@@ -249,7 +249,7 @@ export function FieldSettings({
             <div className="space-y-4">
               <Label>Configurações de Upload</Label>
               <div className="space-y-4">
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <Label htmlFor="file-accept" className="text-xs">
                     Tipos de Arquivo Aceitos
                   </Label>
@@ -270,7 +270,7 @@ export function FieldSettings({
                     Use MIME types (image/*, video/*) ou extensões (.pdf, .doc)
                   </p>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <Label htmlFor="file-maxsize" className="text-xs">
                     Tamanho Máximo (MB)
                   </Label>
