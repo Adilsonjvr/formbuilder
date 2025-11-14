@@ -13,7 +13,18 @@ export async function api(path: string, options: RequestInit = {}) {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || res.statusText);
+    let errorMessage = res.statusText;
+
+    try {
+      const json = JSON.parse(text);
+      errorMessage = json.message || errorMessage;
+    } catch {
+      errorMessage = text || errorMessage;
+    }
+
+    const error = new Error(errorMessage);
+    (error as any).status = res.status;
+    throw error;
   }
 
   return res.json();
