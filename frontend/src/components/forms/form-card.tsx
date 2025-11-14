@@ -106,7 +106,7 @@ export function FormCard({
                 <span className="sr-only">Abrir menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48" sideOffset={8}>
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation()

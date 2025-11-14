@@ -66,7 +66,7 @@ export function Header() {
                 <span className="sr-only">Menu do usuário</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48" sideOffset={8}>
               <DropdownMenuItem disabled>
                 <User className="mr-2 h-4 w-4" />
                 Minha Conta
