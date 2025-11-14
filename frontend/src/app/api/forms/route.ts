@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
-import { CreateFormDTO } from '@/dtos/form.dto';
-import logger from '@/utils/logger';
+import { CreateFormDTO } from '@/lib/dtos/form.dto';
+import logger from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
-import { AddFormFieldDTO } from '@/dtos/field.dto';
-import logger from '@/utils/logger';
+import { AddFormFieldDTO } from '@/lib/dtos/field.dto';
+import logger from '@/lib/logger';
 
 export async function POST(
   req: NextRequest,

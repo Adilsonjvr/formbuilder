@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import logger from '@/utils/logger';
+import logger from '@/lib/logger';
 
 // Simple in-memory rate limiting for MVP
 // In production, use Redis or similar

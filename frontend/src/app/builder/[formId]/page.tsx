@@ -3,7 +3,7 @@
 import { use } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { BuilderLayout } from '@/components/layouts/builder-layout'
+import { BuilderLayout } from '@/components/layout/builder-layout'
 import { FormBuilderState, FormField } from '@/types/form-builder'
 import { api } from '@/lib/api'
 import { Skeleton } from '@/components/ui/skeleton'
