@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  name         String?
-  passwordHash String   @map("password_hash")
-  forms        Form[]
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  name               String?
+  passwordHash       String              @map("password_hash")
+  forms              Form[]
+  passwordResetTokens PasswordResetToken[]
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  deletedAt          DateTime?           @map("deleted_at")
 }
 
 model Form {
@@ -61,4 +62,18 @@ model FormResponse {
   @@index([formId])
   @@index([createdAt])
   @@index([deletedAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
 }
