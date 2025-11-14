@@ -21,10 +21,16 @@ export default function BuilderPage({ params }: PageProps) {
   const isNew = formId === 'new'
 
   // Fetch existing form data if editing
-  const { data: formData, isLoading } = useSWR(
+  const { data: formData, isLoading, error } = useSWR(
     !isNew ? `/api/forms/${formId}` : null,
     () => api(`/api/forms/${formId}`)
   )
+
+  // Redirect to login if unauthorized
+  if (error && error.message.includes('Unauthorized')) {
+    router.push('/login')
+    return null
+  }
 
   const handleSave = async (state: FormBuilderState) => {
     try {
