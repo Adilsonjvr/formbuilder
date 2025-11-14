@@ -24,7 +24,7 @@ export function Header() {
 
   const handleLogout = async () => {
     try {
-      await api('/auth/logout', { method: 'POST' })
+      await api('/api/auth/logout', { method: 'POST' })
       router.push('/login')
     } catch (error) {
       console.error('Logout error:', error)

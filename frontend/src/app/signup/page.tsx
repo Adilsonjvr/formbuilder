@@ -40,7 +40,7 @@ export default function SignupPage() {
     }
 
     try {
-      await api('/auth/signup', {
+      await api('/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({ name, email, password }),
       })

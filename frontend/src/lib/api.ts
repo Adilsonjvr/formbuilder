@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// Using relative paths for API routes in the same Next.js app
+const API_URL = '';
 
 export async function api(path: string, options: RequestInit = {}) {
   const res = await fetch(`${API_URL}${path}`, {

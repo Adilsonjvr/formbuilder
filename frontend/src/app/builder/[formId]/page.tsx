@@ -22,15 +22,15 @@ export default function BuilderPage({ params }: PageProps) {
 
   // Fetch existing form data if editing
   const { data: formData, isLoading } = useSWR(
-    !isNew ? `/forms/${formId}` : null,
-    () => api(`/forms/${formId}`)
+    !isNew ? `/api/forms/${formId}` : null,
+    () => api(`/api/forms/${formId}`)
   )
 
   const handleSave = async (state: FormBuilderState) => {
     try {
       if (isNew) {
         // Create new form
-        const response = await api('/forms', {
+        const response = await api('/api/forms', {
           method: 'POST',
           body: JSON.stringify({
             name: state.name,
@@ -44,7 +44,7 @@ export default function BuilderPage({ params }: PageProps) {
         if (state.fields.length > 0) {
           await Promise.all(
             state.fields.map((field) =>
-              api(`/forms/${newFormId}/fields`, {
+              api(`/api/forms/${newFormId}/fields`, {
                 method: 'POST',
                 body: JSON.stringify({
                   type: field.type,
@@ -67,7 +67,7 @@ export default function BuilderPage({ params }: PageProps) {
         router.push(`/builder/${newFormId}`)
       } else {
         // Update existing form
-        await api(`/forms/${formId}`, {
+        await api(`/api/forms/${formId}`, {
           method: 'PUT',
           body: JSON.stringify({
             name: state.name,

@@ -31,7 +31,7 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      await api('/auth/login', {
+      await api('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       })

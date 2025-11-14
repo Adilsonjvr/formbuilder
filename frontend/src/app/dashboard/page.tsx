@@ -30,8 +30,8 @@ interface FormsResponse {
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { data, error, isLoading, mutate } = useSWR<FormsResponse>('/forms', () =>
-    api('/forms')
+  const { data, error, isLoading, mutate } = useSWR<FormsResponse>('/api/forms', () =>
+    api('/api/forms')
   )
 
   const handleEdit = (formId: string) => {
