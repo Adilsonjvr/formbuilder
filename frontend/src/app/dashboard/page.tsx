@@ -99,9 +99,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container py-12 space-y-8">
+    <div className="container pt-16 pb-12 space-y-10">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Meus Formulários</h1>
           <p className="text-muted-foreground mt-2">
