@@ -157,6 +157,7 @@ export default function SignupPage() {
               Já tem uma conta?{' '}
               <Link
                 href="/login"
+                prefetch={false}
                 className="text-primary font-medium hover:underline"
               >
                 Fazer login

@@ -84,6 +84,7 @@ export default function LoginPage() {
                   <Label htmlFor="password">Senha</Label>
                   <Link
                     href="/forgot-password"
+                    prefetch={false}
                     className="text-sm text-primary hover:underline"
                   >
                     Esqueceu?
@@ -136,6 +137,7 @@ export default function LoginPage() {
               Não tem uma conta?{' '}
               <Link
                 href="/signup"
+                prefetch={false}
                 className="text-primary font-medium hover:underline"
               >
                 Criar conta
