@@ -17,6 +17,7 @@ import { Star } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import dynamic from 'next/dynamic'
+import type { UploadedFile } from '@/lib/upload'
 
 const FileUpload = dynamic(
   () => import('@/components/forms/file-upload').then((mod) => mod.FileUpload),
@@ -222,8 +223,8 @@ export function FieldRenderer({
       case 'FILE':
         return (
           <FileUpload
-            value={value}
-            onChange={onChange}
+            value={(value as UploadedFile | null | undefined) ?? null}
+            onChange={(file) => onChange(file)}
             accept={field.validation?.pattern}
             maxSize={field.validation?.maxLength || 10}
             error={error}
