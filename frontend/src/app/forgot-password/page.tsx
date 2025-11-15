@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
     setLoading(true)
 
     try {
-      const response = await api('/api/auth/forgot-password', {
+      const response = await api<{ resetUrl?: string }>('/api/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({ email }),
       })
