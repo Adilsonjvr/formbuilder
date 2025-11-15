@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { motion } from 'framer-motion'
@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 
 interface FormField {
@@ -60,16 +62,28 @@ export default function ResponsesPage({ params }: PageProps) {
   const [selectedResponse, setSelectedResponse] = useState<Response | null>(null)
   const [responseToDelete, setResponseToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
 
   const { data: formData, isLoading: formLoading, error: formError } = useSWR<FormData>(
     `/api/forms/${id}`,
     () => api(`/api/forms/${id}`)
   )
 
+  const responsesEndpoint = `/api/forms/${id}/responses?page=${page}&limit=${pageSize}`
+
   const { data: responsesData, isLoading: responsesLoading, error: responsesError, mutate } = useSWR<ResponsesData>(
-    `/api/forms/${id}/responses`,
-    () => api(`/api/forms/${id}/responses`)
+    responsesEndpoint,
+    () => api(responsesEndpoint)
   )
+
+  useEffect(() => {
+    if (!responsesData) return
+    const totalPagesFromData = Math.max(1, Math.ceil(responsesData.total / responsesData.limit))
+    if (responsesData.total > 0 && page > totalPagesFromData) {
+      setPage(totalPagesFromData)
+    }
+  }, [responsesData, page])
 
   // Redirect to login if unauthorized
   if (formError && formError.message.includes('Unauthorized')) {
@@ -79,6 +93,16 @@ export default function ResponsesPage({ params }: PageProps) {
 
   const isLoading = formLoading || responsesLoading
   const error = formError || responsesError
+  const totalResponses = responsesData?.total ?? 0
+  const currentPage = responsesData?.page ?? page
+  const currentLimit = responsesData?.limit ?? pageSize
+  const normalizedLimit = currentLimit || 1
+  const totalPages = Math.max(1, Math.ceil(totalResponses / normalizedLimit))
+  const visibleCount = responsesData?.items.length ?? 0
+  const startItem = totalResponses === 0 ? 0 : (currentPage - 1) * normalizedLimit + 1
+  const endItem = totalResponses === 0 ? 0 : startItem + Math.max(visibleCount - 1, 0)
+  const canGoToPrevious = currentPage > 1
+  const canGoToNext = totalResponses > 0 && currentPage < totalPages
 
   const getFieldValue = (response: Response, fieldId: string) => {
     const field = response.data.find((d: ResponseData) => d.fieldId === fieldId)
@@ -318,10 +342,80 @@ export default function ResponsesPage({ params }: PageProps) {
           )}
 
           {responsesData && responsesData.total > 0 && (
-            <div className="flex items-center justify-between pt-4 mt-4 border-t">
-              <p className="text-sm text-muted-foreground">
-                Mostrando {responsesData.items.length} de {responsesData.total} respostas
-              </p>
+            <div className="flex flex-col gap-4 pt-4 mt-4 border-t md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Mostrando {startItem}-{endItem} de {responsesData.total} respostas
+                </p>
+                <p className="text-xs text-muted-foreground">Página {currentPage} de {totalPages}</p>
+              </div>
+
+              <div className="flex flex-col gap-4 w-full sm:flex-row sm:items-center sm:justify-end">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Respostas por página</span>
+                  <Select
+                    value={String(pageSize)}
+                    onValueChange={(value) => {
+                      const newSize = Number(value)
+                      setPageSize(newSize)
+                      setPage(1)
+                    }}
+                  >
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent align="end">
+                      {[10, 25, 50, 100].map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size} / página
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Pagination className="md:justify-end">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        aria-disabled={!canGoToPrevious}
+                        onClick={(event) => {
+                          event.preventDefault()
+                          if (canGoToPrevious) {
+                            setPage((prev) => Math.max(prev - 1, 1))
+                          }
+                        }}
+                        className={!canGoToPrevious ? 'pointer-events-none opacity-50' : undefined}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        size="default"
+                        isActive
+                        aria-disabled
+                        onClick={(event) => event.preventDefault()}
+                      >
+                        Página {currentPage} de {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        aria-disabled={!canGoToNext}
+                        onClick={(event) => {
+                          event.preventDefault()
+                          if (canGoToNext) {
+                            setPage((prev) => prev + 1)
+                          }
+                        }}
+                        className={!canGoToNext ? 'pointer-events-none opacity-50' : undefined}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             </div>
           )}
         </CardContent>
