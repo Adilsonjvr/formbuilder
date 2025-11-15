@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 
 type ResponseData = {
@@ -35,7 +36,7 @@ export async function GET(
       return NextResponse.json({ message: 'Form not found' }, { status: 404 });
     }
 
-    const baseWhere: Parameters<typeof prisma.formResponse.findMany>[0]['where'] = {
+    const baseWhere: Prisma.FormResponseWhereInput = {
       formId,
       deletedAt: null,
     };
