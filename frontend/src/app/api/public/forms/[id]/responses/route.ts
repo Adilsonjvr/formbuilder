@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import logger from '@/lib/logger';
+import { Prisma } from '@prisma/client';
 
 type SubmittedField = {
   fieldId: string
@@ -86,7 +87,7 @@ export async function POST(
     const response = await prisma.formResponse.create({
       data: {
         formId,
-        data: submittedFields,
+        data: submittedFields as Prisma.JsonArray,
         ip: ip !== 'unknown' ? ip : null,
         createdAt: new Date(),
       },
