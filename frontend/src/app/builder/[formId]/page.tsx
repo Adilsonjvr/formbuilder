@@ -57,7 +57,7 @@ export default function BuilderPage({ params }: PageProps) {
     try {
       if (isNew) {
         // Create new form
-        const response = await api('/api/forms', {
+        const response = await api<{ id: string }>('/api/forms', {
           method: 'POST',
           body: JSON.stringify({
             name: state.name,
