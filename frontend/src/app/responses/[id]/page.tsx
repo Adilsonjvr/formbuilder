@@ -20,12 +20,15 @@ import { Input } from '@/components/ui/input'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { toast } from 'sonner'
+import { ResponseAnalytics } from '@/components/analytics/response-analytics'
 
 interface FormField {
   id: string
   type: string
   label: string
   order: number
+  required: boolean
+  max?: number | null
 }
 
 interface FormData {
@@ -170,6 +173,13 @@ export default function ResponsesPage({ params }: PageProps) {
     ipFilter ? 'IP' : null,
     searchTerm ? 'busca' : null,
   ].filter(Boolean) as string[]
+  const analyticsFields = formData?.fields.map((field) => ({
+    id: field.id,
+    label: field.label,
+    type: field.type,
+    required: field.required,
+    max: field.max ?? null,
+  }))
 
   const getFieldValue = (response: Response, fieldId: string) => {
     const field = response.data.find((d: ResponseData) => d.fieldId === fieldId)
@@ -364,6 +374,19 @@ export default function ResponsesPage({ params }: PageProps) {
           </CardHeader>
         </Card>
       </div>
+
+      {/* Analytics */}
+      {!isLoading && analyticsFields && responsesData?.items && responsesData.items.length > 0 && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Insights de Respostas</h2>
+            <p className="text-sm text-muted-foreground">
+              Acompanhe tendências, distribuição de respostas e taxas de conclusão deste formulário.
+            </p>
+          </div>
+          <ResponseAnalytics fields={analyticsFields} responses={responsesData.items} />
+        </div>
+      )}
 
       {/* Filters */}
       <Card>

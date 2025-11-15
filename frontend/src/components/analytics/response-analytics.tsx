@@ -14,17 +14,29 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { FormField } from '@/types/form-builder'
 import { Badge } from '@/components/ui/badge'
+
+interface AnalyticsField {
+  id: string
+  label: string
+  type: string
+  required?: boolean
+  max?: number | null
+}
+
+interface ResponseDataEntry {
+  fieldId: string
+  value: unknown
+}
 
 interface Response {
   id: string
-  data: Record<string, unknown>
+  data: ResponseDataEntry[]
   createdAt: string
 }
 
 interface ResponseAnalyticsProps {
-  fields: FormField[]
+  fields: AnalyticsField[]
   responses: Response[]
 }
 
@@ -39,12 +51,17 @@ const COLORS = [
   '#ff8042',
 ]
 
+const getFieldType = (field: AnalyticsField) => field.type.toUpperCase()
+
+const getFieldValue = (response: Response, fieldId: string) =>
+  response.data.find((entry) => entry.fieldId === fieldId)?.value
+
 export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps) {
   // Calculate field statistics
   const fieldStats = useMemo(() => {
     return fields.map((field) => {
       const values = responses
-        .map((r) => r.data[field.id])
+        .map((response) => getFieldValue(response, field.id))
         .filter(
           (value): value is string | number | string[] =>
             value !== undefined && value !== null
@@ -53,7 +70,8 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
 
       // Count occurrences for select/radio/checkbox fields
       const valueCounts: Record<string, number> = {}
-      if (['SELECT', 'RADIO', 'CHECKBOX'].includes(field.type)) {
+      const normalizedType = getFieldType(field)
+      if (['SELECT', 'RADIO', 'CHECKBOX'].includes(normalizedType)) {
         values.forEach((val) => {
           if (Array.isArray(val)) {
             val.forEach((v) => {
@@ -68,7 +86,7 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
 
       // Calculate average for numeric fields
       let average: number | null = null
-      if (['NUMBER', 'RATING', 'NPS'].includes(field.type)) {
+      if (['NUMBER', 'RATING', 'NPS'].includes(normalizedType)) {
         const numericValues = values
           .map((value) => Number(value))
           .filter((n) => !Number.isNaN(n))
@@ -129,7 +147,7 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
 
     const completeResponses = responses.filter((response) => {
       return requiredFields.every((field) => {
-        const value = response.data[field.id]
+        const value = getFieldValue(response, field.id)
         return value !== null && value !== undefined && value !== ''
       })
     })
@@ -199,7 +217,7 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
         // Only show analytics for fields with options or numeric fields
         if (
           !['SELECT', 'RADIO', 'CHECKBOX', 'RATING', 'NPS', 'NUMBER'].includes(
-            stat.field.type
+            getFieldType(stat.field)
           )
         ) {
           return null
@@ -231,13 +249,13 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
                     <p className="text-sm text-muted-foreground">Média</p>
                     <p className="text-2xl font-bold">
                       {averageValue.toFixed(1)}
-                      {stat.field.type === 'RATING' && (
+                      {getFieldType(stat.field) === 'RATING' && (
                         <span className="text-base text-muted-foreground">
                           {' '}
                           / {stat.field.max || 5}
                         </span>
                       )}
-                      {stat.field.type === 'NPS' && (
+                      {getFieldType(stat.field) === 'NPS' && (
                         <span className="text-base text-muted-foreground"> / 10</span>
                       )}
                     </p>
