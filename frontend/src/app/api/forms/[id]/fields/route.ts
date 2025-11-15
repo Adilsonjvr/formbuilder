@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 import { AddFormFieldDTO } from '@/lib/dtos/field.dto';
 import logger from '@/lib/logger';
+import { sanitizeFieldSettingsInput } from '@/lib/field-settings';
+import { sanitizeRequiredString } from '@/lib/sanitize';
 
 export async function POST(
   req: NextRequest,
@@ -21,7 +23,9 @@ export async function POST(
       return NextResponse.json({ message }, { status: 400 });
     }
 
-    const { type, label, required, order, settings } = validation.data;
+    const { type, required, order } = validation.data;
+    const sanitizedLabel = sanitizeRequiredString(validation.data.label);
+    const sanitizedSettings = sanitizeFieldSettingsInput(validation.data.settings);
 
     const form = await prisma.form.findFirst({
       where: { id: formId, userId: user.id, deletedAt: null },
@@ -32,7 +36,15 @@ export async function POST(
     }
 
     const field = await prisma.formField.create({
-      data: { formId, type, label, required, order, settings, createdAt: new Date() },
+      data: {
+        formId,
+        type,
+        label: sanitizedLabel,
+        required,
+        order,
+        settings: sanitizedSettings,
+        createdAt: new Date(),
+      },
     });
 
     logger.info('field_created', { userId: user.id, formId, fieldId: field.id });

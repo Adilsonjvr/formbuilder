@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 import logger from '@/lib/logger';
 import { parseFieldSettings } from '@/lib/field-settings';
+import { sanitizeNullableString, sanitizeRequiredString } from '@/lib/sanitize';
 
 export async function GET(
   req: NextRequest,
@@ -83,7 +84,10 @@ export async function PUT(
     requireAuth(user);
 
     const { id } = await params;
-    const { name, description } = await req.json();
+    const body = await req.json();
+    const sanitizedName = body.name ? sanitizeRequiredString(body.name) : undefined;
+    const sanitizedDescription =
+      body.description !== undefined ? sanitizeNullableString(body.description) : undefined;
 
     const form = await prisma.form.findFirst({
       where: { id, userId: user.id, deletedAt: null },
@@ -95,7 +99,11 @@ export async function PUT(
 
     const updated = await prisma.form.update({
       where: { id: form.id },
-      data: { name: name ?? form.name, description: description ?? form.description },
+      data: {
+        name: sanitizedName ?? form.name,
+        description:
+          sanitizedDescription !== undefined ? sanitizedDescription : form.description,
+      },
     });
 
     logger.info('form_updated', { userId: user.id, formId: updated.id });

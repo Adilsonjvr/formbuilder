@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client'
+import { sanitizeOptionalString, sanitizeStringArray } from '@/lib/sanitize'
 
 export type FieldSettings = {
   placeholder?: string
@@ -30,5 +31,20 @@ export const parseFieldSettings = (settings: Prisma.JsonValue | null): FieldSett
     min: numberValue(record.min),
     max: numberValue(record.max),
     validation: objectValue(record.validation),
+  }
+}
+
+export const sanitizeFieldSettingsInput = (settings?: FieldSettings | null) => {
+  if (!settings) {
+    return undefined
+  }
+
+  return {
+    placeholder: sanitizeOptionalString(settings.placeholder),
+    helpText: sanitizeOptionalString(settings.helpText),
+    options: sanitizeStringArray(settings.options),
+    min: settings.min,
+    max: settings.max,
+    validation: settings.validation,
   }
 }

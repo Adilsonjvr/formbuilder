@@ -2,10 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import logger from '@/lib/logger';
 import { Prisma } from '@prisma/client';
+import { sanitizeRequiredString } from '@/lib/sanitize';
 
 type SubmittedField = {
   fieldId: string
   value: unknown
+}
+
+const sanitizeResponseValue = (value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return sanitizeRequiredString(value)
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => (typeof item === 'string' ? sanitizeRequiredString(item) : item))
+  }
+
+  return value
 }
 
 const parseSubmittedFields = (payload: unknown): SubmittedField[] => {
@@ -24,7 +37,7 @@ const parseSubmittedFields = (payload: unknown): SubmittedField[] => {
     })
     .map((item) => ({
       fieldId: (item as { fieldId: string }).fieldId,
-      value: (item as { value: unknown }).value ?? null,
+      value: sanitizeResponseValue((item as { value: unknown }).value ?? null),
     }))
 }
 

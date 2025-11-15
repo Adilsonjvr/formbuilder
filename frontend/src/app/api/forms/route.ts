@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 import { CreateFormDTO } from '@/lib/dtos/form.dto';
 import logger from '@/lib/logger';
+import { sanitizeNullableString, sanitizeRequiredString } from '@/lib/sanitize';
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,12 +18,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message }, { status: 400 });
     }
 
-    const { name, description } = validation.data;
+    const sanitizedName = sanitizeRequiredString(validation.data.name);
+    const sanitizedDescription = sanitizeNullableString(validation.data.description);
 
     const form = await prisma.form.create({
       data: {
-        name,
-        description,
+        name: sanitizedName,
+        description: sanitizedDescription,
         userId: user.id,
       },
     });

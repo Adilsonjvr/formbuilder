@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 import logger from '@/lib/logger';
+import { sanitizeFieldSettingsInput } from '@/lib/field-settings';
+import { sanitizeRequiredString } from '@/lib/sanitize';
 
 export async function PUT(
   req: NextRequest,
@@ -13,6 +15,25 @@ export async function PUT(
 
     const { id: formId, fieldId } = await params;
     const body = await req.json();
+    const sanitizedLabel = body.label ? sanitizeRequiredString(body.label) : undefined;
+    const rawSettings =
+      body.settings ??
+      (body.placeholder ||
+      body.helpText ||
+      body.options ||
+      body.min !== undefined ||
+      body.max !== undefined ||
+      body.validation
+        ? {
+            placeholder: body.placeholder,
+            helpText: body.helpText,
+            options: body.options,
+            min: body.min,
+            max: body.max,
+            validation: body.validation,
+          }
+        : undefined);
+    const sanitizedSettings = sanitizeFieldSettingsInput(rawSettings);
 
     // Verify form ownership
     const form = await prisma.form.findFirst({
@@ -37,17 +58,10 @@ export async function PUT(
       where: { id: fieldId },
       data: {
         type: body.type ?? existingField.type,
-        label: body.label ?? existingField.label,
+        label: sanitizedLabel ?? existingField.label,
         required: body.required ?? existingField.required,
         order: body.order ?? existingField.order,
-        settings: {
-          placeholder: body.placeholder,
-          helpText: body.helpText,
-          options: body.options,
-          min: body.min,
-          max: body.max,
-          validation: body.validation,
-        },
+        settings: sanitizedSettings ?? existingField.settings,
       },
     });
 
