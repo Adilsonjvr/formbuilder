@@ -63,7 +63,7 @@ export async function PUT(
     }
 
     if (sanitizedSettings !== undefined) {
-      data.settings = sanitizedSettings as Prisma.JsonValue
+      data.settings = sanitizedSettings
     }
 
     const updatedField = await prisma.formField.update({

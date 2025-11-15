@@ -34,17 +34,41 @@ export const parseFieldSettings = (settings: Prisma.JsonValue | null): FieldSett
   }
 }
 
-export const sanitizeFieldSettingsInput = (settings?: FieldSettings | null) => {
+export const sanitizeFieldSettingsInput = (
+  settings?: FieldSettings | null
+): Prisma.InputJsonValue | undefined => {
   if (!settings) {
     return undefined
   }
 
-  return {
-    placeholder: sanitizeOptionalString(settings.placeholder),
-    helpText: sanitizeOptionalString(settings.helpText),
-    options: sanitizeStringArray(settings.options),
-    min: settings.min,
-    max: settings.max,
-    validation: settings.validation,
+  const result: Record<string, unknown> = {}
+
+  const placeholder = sanitizeOptionalString(settings.placeholder)
+  if (placeholder !== undefined) {
+    result.placeholder = placeholder
   }
+
+  const helpText = sanitizeOptionalString(settings.helpText)
+  if (helpText !== undefined) {
+    result.helpText = helpText
+  }
+
+  const options = sanitizeStringArray(settings.options)
+  if (options !== undefined) {
+    result.options = options
+  }
+
+  if (settings.min !== undefined) {
+    result.min = settings.min
+  }
+
+  if (settings.max !== undefined) {
+    result.max = settings.max
+  }
+
+  if (settings.validation !== undefined) {
+    result.validation = settings.validation
+  }
+
+  return Object.keys(result).length > 0 ? result : {}
 }
