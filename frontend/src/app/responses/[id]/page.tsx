@@ -1,20 +1,24 @@
 'use client'
 
-import { use, useEffect, useState } from 'react'
+import { Fragment, use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { motion } from 'framer-motion'
 import { ArrowLeft, Calendar, MapPin, Download, Eye, Trash2 } from 'lucide-react'
+import { format, subDays } from 'date-fns'
+import { DateRange } from 'react-day-picker'
 import { api } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { toast } from 'sonner'
 
 interface FormField {
@@ -33,7 +37,7 @@ interface FormData {
 
 interface ResponseData {
   fieldId: string
-  value: any
+  value: unknown
 }
 
 interface Response {
@@ -64,18 +68,70 @@ export default function ResponsesPage({ params }: PageProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const [selectedField, setSelectedField] = useState('all')
+  const [fieldValue, setFieldValue] = useState('')
+  const [ipFilter, setIpFilter] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const debouncedIpFilter = useDebounce(ipFilter, 400)
+  const debouncedFieldValue = useDebounce(fieldValue, 400)
+  const debouncedSearchTerm = useDebounce(searchTerm, 400)
+
+  const filtersSignature = [
+    dateRange?.from?.toISOString() ?? '',
+    dateRange?.to?.toISOString() ?? '',
+    selectedField,
+    debouncedFieldValue,
+    debouncedIpFilter,
+    debouncedSearchTerm,
+  ].join('|')
 
   const { data: formData, isLoading: formLoading, error: formError } = useSWR<FormData>(
     `/api/forms/${id}`,
     () => api(`/api/forms/${id}`)
   )
 
-  const responsesEndpoint = `/api/forms/${id}/responses?page=${page}&limit=${pageSize}`
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    limit: String(pageSize),
+  })
+
+  if (dateRange?.from) {
+    const fromDate = new Date(dateRange.from)
+    fromDate.setHours(0, 0, 0, 0)
+    queryParams.set('startDate', fromDate.toISOString())
+  }
+
+  const toSource = dateRange?.to ?? dateRange?.from
+  if (toSource) {
+    const toDate = new Date(toSource)
+    toDate.setHours(23, 59, 59, 999)
+    queryParams.set('endDate', toDate.toISOString())
+  }
+
+  if (debouncedIpFilter) {
+    queryParams.set('ip', debouncedIpFilter)
+  }
+
+  if (selectedField !== 'all' && debouncedFieldValue) {
+    queryParams.set('fieldId', selectedField)
+    queryParams.set('fieldValue', debouncedFieldValue)
+  }
+
+  if (debouncedSearchTerm) {
+    queryParams.set('search', debouncedSearchTerm)
+  }
+
+  const responsesEndpoint = `/api/forms/${id}/responses?${queryParams.toString()}`
 
   const { data: responsesData, isLoading: responsesLoading, error: responsesError, mutate } = useSWR<ResponsesData>(
     responsesEndpoint,
     () => api(responsesEndpoint)
   )
+
+  useEffect(() => {
+    setPage((prev) => (prev === 1 ? prev : 1))
+  }, [filtersSignature])
 
   useEffect(() => {
     if (!responsesData) return
@@ -103,6 +159,17 @@ export default function ResponsesPage({ params }: PageProps) {
   const endItem = totalResponses === 0 ? 0 : startItem + Math.max(visibleCount - 1, 0)
   const canGoToPrevious = currentPage > 1
   const canGoToNext = totalResponses > 0 && currentPage < totalPages
+  const hasActiveFilters =
+    Boolean(dateRange?.from || dateRange?.to) ||
+    Boolean(ipFilter) ||
+    (selectedField !== 'all' && Boolean(fieldValue)) ||
+    Boolean(searchTerm)
+  const activeFilterLabels = [
+    dateRange?.from ? 'período' : null,
+    selectedField !== 'all' && fieldValue ? 'campo' : null,
+    ipFilter ? 'IP' : null,
+    searchTerm ? 'busca' : null,
+  ].filter(Boolean) as string[]
 
   const getFieldValue = (response: Response, fieldId: string) => {
     const field = response.data.find((d: ResponseData) => d.fieldId === fieldId)
@@ -113,6 +180,24 @@ export default function ResponsesPage({ params }: PageProps) {
       return field.value ? 'Sim' : 'Não'
     }
     return String(field.value)
+  }
+
+  const highlightMatches = (text: string) => {
+    if (!text) return text
+    if (!debouncedSearchTerm) return text
+    const escapedSearch = escapeRegExp(debouncedSearchTerm)
+    if (!escapedSearch) return text
+    const regex = new RegExp(`(${escapedSearch})`, 'gi')
+    const parts = text.split(regex)
+    return parts.map((part, index) =>
+      index % 2 === 1 ? (
+        <mark key={`${part}-${index}`} className="rounded bg-primary/20 px-0.5 text-primary">
+          {part}
+        </mark>
+      ) : (
+        <Fragment key={`${part}-${index}`}>{part}</Fragment>
+      )
+    )
   }
 
   const formatDate = (date: string) => {
@@ -167,6 +252,28 @@ export default function ResponsesPage({ params }: PageProps) {
     } finally {
       setIsDeleting(false)
     }
+  }
+
+  const handleSelectField = (value: string) => {
+    setSelectedField(value)
+    if (value === 'all') {
+      setFieldValue('')
+    }
+  }
+
+  const handleQuickRange = (days: number) => {
+    const now = new Date()
+    const from = subDays(now, days - 1)
+    setDateRange({ from, to: now })
+  }
+
+  const handleClearFilters = () => {
+    setDateRange(undefined)
+    setSelectedField('all')
+    setFieldValue('')
+    setIpFilter('')
+    setSearchTerm('')
+    setPage(1)
   }
 
   if (error) {
@@ -258,13 +365,139 @@ export default function ResponsesPage({ params }: PageProps) {
         </Card>
       </div>
 
+      {/* Filters */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle>Filtros</CardTitle>
+          <CardDescription>Refine as respostas exibidas para este formulário</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Período</p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !dateRange?.from && 'text-muted-foreground'
+                    )}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        `${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')}`
+                      ) : (
+                        format(dateRange.from, 'dd/MM/yyyy')
+                      )
+                    ) : (
+                      <span>Selecionar período</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    initialFocus
+                    mode="range"
+                    numberOfMonths={2}
+                    selected={dateRange}
+                    onSelect={(range) => setDateRange(range)}
+                  />
+                  <div className="border-t p-3 space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">Atalhos rápidos</p>
+                    <div className="flex flex-wrap gap-2">
+                      {[7, 30].map((days) => (
+                        <Button
+                          key={days}
+                          variant="ghost"
+                          size="sm"
+                          className="px-2"
+                          onClick={() => handleQuickRange(days)}
+                        >
+                          Últimos {days} dias
+                        </Button>
+                      ))}
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => setDateRange(undefined)}>
+                      Limpar período
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Campo</p>
+              <Select
+                value={selectedField}
+                onValueChange={handleSelectField}
+                disabled={!formData || formData.fields.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar campo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os campos</SelectItem>
+                  {formData?.fields.map((field) => (
+                    <SelectItem key={field.id} value={field.id}>
+                      {field.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Valor do campo</p>
+              <Input
+                placeholder="Digite para filtrar"
+                value={fieldValue}
+                onChange={(event) => setFieldValue(event.target.value)}
+                disabled={selectedField === 'all'}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Endereço IP</p>
+              <Input
+                placeholder="Ex: 192.168.0.1"
+                value={ipFilter}
+                onChange={(event) => setIpFilter(event.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={handleClearFilters} disabled={!hasActiveFilters}>
+              Limpar filtros
+            </Button>
+            {hasActiveFilters && (
+              <span className="text-xs text-muted-foreground">
+                Filtros ativos: {activeFilterLabels.join(', ')}
+              </span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Responses Table */}
       <Card>
-        <CardHeader>
-          <CardTitle>Respostas</CardTitle>
-          <CardDescription>
-            Visualize todas as respostas recebidas para este formulário
-          </CardDescription>
+        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <CardTitle>Respostas</CardTitle>
+            <CardDescription>
+              Visualize todas as respostas recebidas para este formulário
+            </CardDescription>
+          </div>
+          <div className="w-full md:w-[320px]">
+            <Input
+              type="search"
+              placeholder="Buscar em todas as respostas"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -299,16 +532,21 @@ export default function ResponsesPage({ params }: PageProps) {
                           {formatDate(response.createdAt)}
                         </div>
                       </TableCell>
-                      {formData?.fields.map((field) => (
-                        <TableCell key={field.id}>
-                          {getFieldValue(response, field.id)}
-                        </TableCell>
-                      ))}
+                      {formData?.fields.map((field) => {
+                        const value = getFieldValue(response, field.id)
+                        return (
+                          <TableCell key={field.id}>
+                            {typeof value === 'string' ? highlightMatches(value) : value}
+                          </TableCell>
+                        )
+                      })}
                       <TableCell>
                         {response.ip ? (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-4 w-4" />
-                            <span className="font-mono text-xs">{response.ip}</span>
+                            <span className="font-mono text-xs">
+                              {highlightMatches(response.ip)}
+                            </span>
                           </div>
                         ) : (
                           '-'
@@ -491,4 +729,19 @@ export default function ResponsesPage({ params }: PageProps) {
       </AlertDialog>
     </div>
   )
+}
+
+function useDebounce<T>(value: T, delay = 400) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+
+  return debouncedValue
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
