@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 import logger from '@/lib/logger';
@@ -61,7 +62,10 @@ export async function PUT(
         label: sanitizedLabel ?? existingField.label,
         required: body.required ?? existingField.required,
         order: body.order ?? existingField.order,
-        settings: sanitizedSettings ?? existingField.settings,
+        settings:
+          sanitizedSettings !== undefined
+            ? (sanitizedSettings as Prisma.JsonValue)
+            : existingField.settings,
       },
     });
 

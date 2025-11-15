@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 import { AddFormFieldDTO } from '@/lib/dtos/field.dto';
@@ -42,7 +43,7 @@ export async function POST(
         label: sanitizedLabel,
         required,
         order,
-        settings: sanitizedSettings,
+        settings: sanitizedSettings ? (sanitizedSettings as Prisma.JsonValue) : undefined,
         createdAt: new Date(),
       },
     });
