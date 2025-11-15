@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { fadeInUp, hoverLift, tapScale, transitions } from '@/lib/motion'
+import { fadeInUp, transitions } from '@/lib/motion'
 
 interface FormCardProps {
   id: string

@@ -1,7 +1,17 @@
 // Using relative paths for API routes in the same Next.js app
 const API_URL = '';
 
-export async function api(path: string, options: RequestInit = {}) {
+class ApiError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
+export async function api<TResponse = unknown>(path: string, options: RequestInit = {}) {
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
@@ -22,10 +32,8 @@ export async function api(path: string, options: RequestInit = {}) {
       errorMessage = text || errorMessage;
     }
 
-    const error = new Error(errorMessage);
-    (error as any).status = res.status;
-    throw error;
+    throw new ApiError(errorMessage, res.status);
   }
 
-  return res.json();
+  return res.json() as Promise<TResponse>;
 }

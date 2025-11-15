@@ -45,7 +45,7 @@ export default function SignupPage() {
         body: JSON.stringify({ name, email, password }),
       })
       router.push('/dashboard')
-    } catch (err: any) {
+    } catch {
       setError('Erro ao criar conta. Este email pode já estar em uso.')
     } finally {
       setLoading(false)

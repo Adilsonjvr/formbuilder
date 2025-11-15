@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { fadeIn, scaleIn, transitions } from '@/lib/motion'
+import { scaleIn, transitions } from '@/lib/motion'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,7 +36,7 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
       router.push('/dashboard')
-    } catch (err: any) {
+    } catch {
       setError('Credenciais inválidas. Verifique e tente novamente.')
     } finally {
       setLoading(false)

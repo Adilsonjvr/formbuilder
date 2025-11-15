@@ -16,11 +16,17 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Star } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import dynamic from 'next/dynamic'
+
+const FileUpload = dynamic(
+  () => import('@/components/forms/file-upload').then((mod) => mod.FileUpload),
+  { ssr: false }
+)
 
 interface FieldRendererProps {
   field: FormField
-  value: any
-  onChange: (value: any) => void
+  value: unknown
+  onChange: (value: unknown) => void
   error?: string
 }
 
@@ -33,11 +39,13 @@ export function FieldRenderer({
   const [hoverRating, setHoverRating] = useState<number | null>(null)
 
   const renderInput = () => {
+    const stringValue = typeof value === 'string' ? value : ''
+    const numberValue = typeof value === 'number' ? value : undefined
     switch (field.type) {
       case 'TEXT':
         return (
           <Input
-            value={value || ''}
+            value={stringValue}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
@@ -50,7 +58,7 @@ export function FieldRenderer({
         return (
           <Input
             type="email"
-            value={value || ''}
+            value={stringValue}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
@@ -61,7 +69,7 @@ export function FieldRenderer({
         return (
           <Input
             type="number"
-            value={value || ''}
+            value={stringValue}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
@@ -74,7 +82,7 @@ export function FieldRenderer({
         return (
           <Input
             type="date"
-            value={value || ''}
+            value={stringValue}
             onChange={(e) => onChange(e.target.value)}
             required={field.required}
           />
@@ -84,7 +92,7 @@ export function FieldRenderer({
         return (
           <Input
             type="time"
-            value={value || ''}
+            value={stringValue}
             onChange={(e) => onChange(e.target.value)}
             required={field.required}
           />
@@ -92,7 +100,7 @@ export function FieldRenderer({
 
       case 'SELECT':
         return (
-          <Select value={value || ''} onValueChange={onChange}>
+          <Select value={stringValue} onValueChange={(val) => onChange(val)}>
             <SelectTrigger>
               <SelectValue placeholder={field.placeholder || 'Selecione uma opção'} />
             </SelectTrigger>
@@ -108,7 +116,7 @@ export function FieldRenderer({
 
       case 'RADIO':
         return (
-          <RadioGroup value={value || ''} onValueChange={onChange}>
+          <RadioGroup value={stringValue} onValueChange={(val) => onChange(val)}>
             {field.options?.map((option, idx) => (
               <div key={idx} className="flex items-center space-x-2">
                 <RadioGroupItem value={option} id={`${field.id}-${idx}`} />
@@ -125,7 +133,7 @@ export function FieldRenderer({
           <div className="space-y-2">
             {field.options?.map((option, idx) => {
               const checked = Array.isArray(value)
-                ? value.includes(option)
+                ? (value as string[]).includes(option)
                 : false
               return (
                 <div key={idx} className="flex items-center space-x-2">
@@ -133,11 +141,12 @@ export function FieldRenderer({
                     id={`${field.id}-${idx}`}
                     checked={checked}
                     onCheckedChange={(isChecked) => {
-                      const currentValues = Array.isArray(value) ? value : []
-                      if (isChecked) {
+                      const currentValues = Array.isArray(value) ? (value as string[]) : []
+                      const nextChecked = isChecked === true
+                      if (nextChecked) {
                         onChange([...currentValues, option])
                       } else {
-                        onChange(currentValues.filter((v: string) => v !== option))
+                        onChange(currentValues.filter((v) => v !== option))
                       }
                     }}
                   />
@@ -152,7 +161,7 @@ export function FieldRenderer({
 
       case 'RATING':
         const maxRating = field.max || 5
-        const currentRating = value || 0
+        const currentRating = typeof numberValue === 'number' ? numberValue : 0
         return (
           <div className="flex items-center gap-1">
             {Array.from({ length: maxRating }, (_, i) => i + 1).map((star) => (
@@ -194,7 +203,7 @@ export function FieldRenderer({
                   onClick={() => onChange(num)}
                   className={cn(
                     'aspect-square rounded-lg border-2 font-semibold transition-all hover:scale-105',
-                    value === num
+                    numberValue === num
                       ? 'border-primary bg-primary text-primary-foreground shadow-md'
                       : 'border-border bg-card hover:border-primary/50'
                   )}
@@ -211,8 +220,6 @@ export function FieldRenderer({
         )
 
       case 'FILE':
-        // Dynamic import to avoid SSR issues
-        const FileUpload = require('@/components/forms/file-upload').FileUpload
         return (
           <FileUpload
             value={value}
@@ -226,7 +233,7 @@ export function FieldRenderer({
       default:
         return (
           <Textarea
-            value={value || ''}
+            value={stringValue}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             required={field.required}

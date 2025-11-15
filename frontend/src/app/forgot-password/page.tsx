@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Mail, ArrowLeft, CheckCircle2, Copy } from 'lucide-react'
@@ -42,8 +41,9 @@ export default function ForgotPasswordPage() {
 
       setSuccess(true)
       toast.success('Link de recuperação gerado!')
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao processar solicitação')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro ao processar solicitação'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

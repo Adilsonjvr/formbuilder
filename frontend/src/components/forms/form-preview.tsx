@@ -23,11 +23,11 @@ interface FormPreviewProps {
 }
 
 export function FormPreview({ open, onClose, formState }: FormPreviewProps) {
-  const [previewData, setPreviewData] = useState<Record<string, any>>({})
+  const [previewData, setPreviewData] = useState<Record<string, unknown>>({})
 
   const sortedFields = [...formState.fields].sort((a, b) => a.order - b.order)
 
-  const handleFieldChange = (fieldId: string, value: any) => {
+  const handleFieldChange = (fieldId: string, value: unknown) => {
     setPreviewData((prev) => ({ ...prev, [fieldId]: value }))
   }
 

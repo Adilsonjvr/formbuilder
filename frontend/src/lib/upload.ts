@@ -49,7 +49,7 @@ export async function uploadFile(
         try {
           const response = JSON.parse(xhr.responseText)
           resolve(response)
-        } catch (error) {
+        } catch {
           reject(new Error('Invalid response from server'))
         }
       } else {

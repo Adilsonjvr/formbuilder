@@ -23,7 +23,6 @@ import { FormPreview } from '@/components/forms/form-preview'
 import { useFormBuilder } from '@/hooks/use-form-builder'
 import { FormBuilderState } from '@/types/form-builder'
 import { FieldType } from '@/lib/constants'
-import { cn } from '@/lib/utils'
 
 interface BuilderLayoutProps {
   initialState?: Partial<FormBuilderState>
@@ -180,8 +179,6 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
           <FieldBuilder
             fields={state.fields}
             activeFieldId={state.activeFieldId}
-            onAddField={addField}
-            onReorderFields={reorderFields}
             onSelectField={handleSelectField}
             onRemoveField={removeField}
             onDuplicateField={duplicateField}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { parseFieldSettings } from '@/lib/field-settings';
 
 export async function GET(
   req: NextRequest,
@@ -28,8 +29,8 @@ export async function GET(
     }
 
     // Flatten settings for each field
-    const fields = (form.fields ?? []).map((field: any) => {
-      const settings = field.settings || {}
+    const fields = (form.fields ?? []).map((field) => {
+      const settings = parseFieldSettings(field.settings)
       return {
         id: field.id,
         type: field.type,

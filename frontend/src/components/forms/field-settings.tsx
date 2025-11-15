@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X, Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { FormField } from '@/types/form-builder'
 import { FIELD_LABELS } from '@/lib/constants'
 import { Button } from '@/components/ui/button'

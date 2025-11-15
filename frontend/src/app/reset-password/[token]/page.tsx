@@ -61,8 +61,9 @@ export default function ResetPasswordPage({ params }: PageProps) {
       setTimeout(() => {
         router.push('/login')
       }, 2000)
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao resetar senha')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro ao resetar senha'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

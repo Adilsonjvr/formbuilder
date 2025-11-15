@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
+
+type ResponseEntry = {
+  fieldId: string
+  value: unknown
+}
+
+const parseResponseData = (data: Prisma.JsonValue): ResponseEntry[] => {
+  if (!Array.isArray(data)) {
+    return []
+  }
+
+  return data.filter((entry): entry is ResponseEntry => {
+    if (!entry || typeof entry !== 'object') return false
+    const candidate = entry as { fieldId?: unknown }
+    return typeof candidate.fieldId === 'string'
+  })
+}
 
 export async function GET(
   req: NextRequest,
@@ -31,26 +49,22 @@ export async function GET(
     }
 
     if (format === 'csv') {
-      // Flatten settings for each field
-      const fields = form.fields.map((field: any) => {
-        const settings = field.settings || {}
-        return {
-          id: field.id,
-          label: field.label,
-          type: field.type,
-        }
-      })
+      const fields = form.fields.map((field) => ({
+        id: field.id,
+        label: field.label,
+        type: field.type,
+      }))
 
       // Generate CSV headers
       const headers = ['Data/Hora', ...fields.map(f => f.label), 'IP']
 
       // Generate CSV rows
-      const rows = form.responses.map((response: any) => {
-        const data = response.data as any[]
+      const rows = form.responses.map((response) => {
+        const data = parseResponseData(response.data)
         const formattedDate = new Date(response.createdAt).toLocaleString('pt-BR')
 
         const fieldValues = fields.map(field => {
-          const fieldData = data.find((d: any) => d.fieldId === field.id)
+          const fieldData = data.find((d) => d.fieldId === field.id)
           if (!fieldData || fieldData.value === null || fieldData.value === undefined) {
             return ''
           }
@@ -84,7 +98,7 @@ export async function GET(
       })
     } else if (format === 'json') {
       // Return as JSON
-      const data = form.responses.map((response: any) => ({
+      const data = form.responses.map((response) => ({
         id: response.id,
         createdAt: response.createdAt,
         ip: response.ip,

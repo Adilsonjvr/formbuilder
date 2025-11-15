@@ -4,7 +4,6 @@ import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import * as Icons from 'lucide-react'
 import {
-  FIELD_TYPES,
   FIELD_LABELS,
   FIELD_DESCRIPTIONS,
   FIELD_ICONS,

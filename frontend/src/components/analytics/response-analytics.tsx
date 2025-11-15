@@ -11,7 +11,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,7 +19,7 @@ import { Badge } from '@/components/ui/badge'
 
 interface Response {
   id: string
-  data: Record<string, any>
+  data: Record<string, unknown>
   createdAt: string
 }
 
@@ -44,7 +43,12 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
   // Calculate field statistics
   const fieldStats = useMemo(() => {
     return fields.map((field) => {
-      const values = responses.map((r) => r.data[field.id]).filter(Boolean)
+      const values = responses
+        .map((r) => r.data[field.id])
+        .filter(
+          (value): value is string | number | string[] =>
+            value !== undefined && value !== null
+        )
       const uniqueValues = new Set(values)
 
       // Count occurrences for select/radio/checkbox fields
@@ -55,8 +59,9 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
             val.forEach((v) => {
               valueCounts[v] = (valueCounts[v] || 0) + 1
             })
-          } else {
-            valueCounts[val] = (valueCounts[val] || 0) + 1
+          } else if (typeof val === 'string' || typeof val === 'number') {
+            const key = String(val)
+            valueCounts[key] = (valueCounts[key] || 0) + 1
           }
         })
       }
@@ -64,7 +69,9 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
       // Calculate average for numeric fields
       let average: number | null = null
       if (['NUMBER', 'RATING', 'NPS'].includes(field.type)) {
-        const numericValues = values.map(Number).filter((n) => !isNaN(n))
+        const numericValues = values
+          .map((value) => Number(value))
+          .filter((n) => !Number.isNaN(n))
         if (numericValues.length > 0) {
           average = numericValues.reduce((a, b) => a + b, 0) / numericValues.length
         }
@@ -82,26 +89,35 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
 
   // Responses over time (last 7 days)
   const responsesOverTime = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
     const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date()
-      date.setDate(date.getDate() - (6 - i))
+      const date = new Date(today)
+      date.setDate(today.getDate() - (6 - i))
       return {
-        date: date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+        label: date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+        key: date.toISOString().split('T')[0],
         count: 0,
       }
     })
 
+    const indexByKey = new Map(last7Days.map((day, index) => [day.key, index]))
+
     responses.forEach((response) => {
       const responseDate = new Date(response.createdAt)
-      const dayIndex = Math.floor(
-        (Date.now() - responseDate.getTime()) / (1000 * 60 * 60 * 24)
-      )
-      if (dayIndex >= 0 && dayIndex < 7) {
-        last7Days[6 - dayIndex].count++
+      responseDate.setHours(0, 0, 0, 0)
+      const key = responseDate.toISOString().split('T')[0]
+      const index = indexByKey.get(key)
+      if (index !== undefined) {
+        last7Days[index].count++
       }
     })
 
-    return last7Days
+    return last7Days.map((day) => ({
+      date: day.label,
+      count: day.count,
+    }))
   }, [responses])
 
   // Completion rate
@@ -191,6 +207,7 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
 
         const hasValueCounts = Object.keys(stat.valueCounts).length > 0
         const hasAverage = stat.average !== null
+        const averageValue = stat.average ?? 0
 
         if (!hasValueCounts && !hasAverage) return null
 
@@ -213,7 +230,7 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Média</p>
                     <p className="text-2xl font-bold">
-                      {stat.average!.toFixed(1)}
+                      {averageValue.toFixed(1)}
                       {stat.field.type === 'RATING' && (
                         <span className="text-base text-muted-foreground">
                           {' '}

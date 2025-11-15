@@ -545,7 +545,7 @@ export default function ResponsesPage({ params }: PageProps) {
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-4 w-4" />
                             <span className="font-mono text-xs">
-                              {highlightMatches(response.ip)}
+                              {highlightMatches(response.ip ?? '')}
                             </span>
                           </div>
                         ) : (

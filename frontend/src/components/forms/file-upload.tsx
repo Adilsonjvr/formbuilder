@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { Upload, X, File as FileIcon, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { Upload, X, Loader2 } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
@@ -134,9 +135,11 @@ export function FileUpload({
           {/* Image preview */}
           {isImage && (
             <div className="mb-3 rounded-md overflow-hidden bg-muted">
-              <img
+              <Image
                 src={value.url}
                 alt={value.originalName}
+                width={800}
+                height={400}
                 className="w-full h-48 object-cover"
               />
             </div>

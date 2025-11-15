@@ -49,14 +49,14 @@ export default function PublicFormPage({ params }: PageProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [formValues, setFormValues] = useState<Record<string, any>>({})
+  const [formValues, setFormValues] = useState<Record<string, unknown>>({})
 
   const { data: formData, isLoading, error } = useSWR<FormData>(
     `/api/public/forms/${id}`,
     () => api(`/api/public/forms/${id}`)
   )
 
-  const handleFieldChange = (fieldId: string, value: any) => {
+  const handleFieldChange = (fieldId: string, value: unknown) => {
     setFormValues((prev) => ({
       ...prev,
       [fieldId]: value,
@@ -69,8 +69,15 @@ export default function PublicFormPage({ params }: PageProps) {
     if (!formData) return
 
     // Validate required fields
+    const isEmptyValue = (value: unknown) => {
+      if (Array.isArray(value)) {
+        return value.length === 0
+      }
+      return value === undefined || value === null || value === ''
+    }
+
     const missingFields = formData.fields
-      .filter((field) => field.required && !formValues[field.id])
+      .filter((field) => field.required && isEmptyValue(formValues[field.id]))
       .map((field) => field.label)
 
     if (missingFields.length > 0) {
@@ -83,7 +90,7 @@ export default function PublicFormPage({ params }: PageProps) {
     try {
       const fields = formData.fields.map((field) => ({
         fieldId: field.id,
-        value: formValues[field.id] || null,
+        value: formValues[field.id] ?? null,
       }))
 
       await api(`/api/public/forms/${id}/responses`, {
@@ -106,6 +113,9 @@ export default function PublicFormPage({ params }: PageProps) {
       required: field.required,
       placeholder: field.placeholder,
     }
+    const rawValue = formValues[field.id]
+    const stringValue = typeof rawValue === 'string' ? rawValue : ''
+    const booleanValue = typeof rawValue === 'boolean' ? rawValue : false
 
     switch (field.type) {
       case 'short_text':
@@ -113,7 +123,7 @@ export default function PublicFormPage({ params }: PageProps) {
           <Input
             {...commonProps}
             type="text"
-            value={formValues[field.id] || ''}
+            value={stringValue}
             onChange={(e) => handleFieldChange(field.id, e.target.value)}
           />
         )
@@ -122,7 +132,7 @@ export default function PublicFormPage({ params }: PageProps) {
         return (
           <Textarea
             {...commonProps}
-            value={formValues[field.id] || ''}
+            value={stringValue}
             onChange={(e) => handleFieldChange(field.id, e.target.value)}
             rows={4}
           />
@@ -133,7 +143,7 @@ export default function PublicFormPage({ params }: PageProps) {
           <Input
             {...commonProps}
             type="email"
-            value={formValues[field.id] || ''}
+            value={stringValue}
             onChange={(e) => handleFieldChange(field.id, e.target.value)}
           />
         )
@@ -145,7 +155,7 @@ export default function PublicFormPage({ params }: PageProps) {
             type="number"
             min={field.min}
             max={field.max}
-            value={formValues[field.id] || ''}
+            value={stringValue}
             onChange={(e) => handleFieldChange(field.id, e.target.value)}
           />
         )
@@ -153,7 +163,7 @@ export default function PublicFormPage({ params }: PageProps) {
       case 'select':
         return (
           <Select
-            value={formValues[field.id] || ''}
+            value={stringValue}
             onValueChange={(value) => handleFieldChange(field.id, value)}
           >
             <SelectTrigger>
@@ -172,7 +182,7 @@ export default function PublicFormPage({ params }: PageProps) {
       case 'radio':
         return (
           <RadioGroup
-            value={formValues[field.id] || ''}
+            value={stringValue}
             onValueChange={(value) => handleFieldChange(field.id, value)}
           >
             {field.options?.map((option, idx) => (
@@ -189,8 +199,8 @@ export default function PublicFormPage({ params }: PageProps) {
           <div className="flex items-center space-x-2">
             <Checkbox
               id={field.id}
-              checked={formValues[field.id] || false}
-              onCheckedChange={(checked) => handleFieldChange(field.id, checked)}
+              checked={booleanValue}
+              onCheckedChange={(checked) => handleFieldChange(field.id, checked === true)}
             />
             <Label htmlFor={field.id}>{field.label}</Label>
           </div>
@@ -201,7 +211,7 @@ export default function PublicFormPage({ params }: PageProps) {
           <Input
             {...commonProps}
             type="text"
-            value={formValues[field.id] || ''}
+            value={stringValue}
             onChange={(e) => handleFieldChange(field.id, e.target.value)}
           />
         )

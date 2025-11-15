@@ -2,6 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import logger from '@/lib/logger';
 
+type SubmittedField = {
+  fieldId: string
+  value: unknown
+}
+
+const parseSubmittedFields = (payload: unknown): SubmittedField[] => {
+  if (!Array.isArray(payload)) {
+    return []
+  }
+
+  return payload
+    .filter((item): item is { fieldId: unknown; value: unknown } => {
+      return Boolean(
+        item &&
+          typeof item === 'object' &&
+          'fieldId' in item &&
+          typeof (item as { fieldId?: unknown }).fieldId === 'string'
+      )
+    })
+    .map((item) => ({
+      fieldId: (item as { fieldId: string }).fieldId,
+      value: (item as { value: unknown }).value ?? null,
+    }))
+}
+
 // Simple in-memory rate limiting for MVP
 // In production, use Redis or similar
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -38,7 +63,10 @@ export async function POST(
     }
 
     const { id: formId } = await params;
-    const { fields } = await req.json();
+    const body = await req.json();
+    const submittedFields = parseSubmittedFields(
+      body && typeof body === 'object' ? (body as { fields?: unknown }).fields : undefined
+    );
 
     const form = await prisma.form.findFirst({
       where: { id: formId, deletedAt: null },
@@ -48,7 +76,7 @@ export async function POST(
       return NextResponse.json({ message: 'Form not found' }, { status: 404 });
     }
 
-    if (!Array.isArray(fields) || fields.length === 0) {
+    if (submittedFields.length === 0) {
       return NextResponse.json(
         { message: 'fields is required' },
         { status: 400 }
@@ -58,7 +86,7 @@ export async function POST(
     const response = await prisma.formResponse.create({
       data: {
         formId,
-        data: fields as any,
+        data: submittedFields,
         ip: ip !== 'unknown' ? ip : null,
         createdAt: new Date(),
       },

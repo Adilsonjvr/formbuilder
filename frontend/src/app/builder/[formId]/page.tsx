@@ -9,6 +9,27 @@ import { api } from '@/lib/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 
+interface BuilderFormField {
+  id: string
+  type: FormField['type']
+  label: string
+  placeholder?: string | null
+  helpText?: string | null
+  required: boolean
+  order: number
+  options?: string[] | null
+  min?: number | null
+  max?: number | null
+  validation?: FormField['validation']
+}
+
+interface BuilderFormResponse {
+  id: string
+  name: string
+  description: string | null
+  fields: BuilderFormField[]
+}
+
 interface PageProps {
   params: Promise<{
     formId: string
@@ -21,7 +42,7 @@ export default function BuilderPage({ params }: PageProps) {
   const isNew = formId === 'new'
 
   // Fetch existing form data if editing
-  const { data: formData, isLoading, error } = useSWR(
+  const { data: formData, isLoading, error } = useSWR<BuilderFormResponse>(
     !isNew ? `/api/forms/${formId}` : null,
     () => api(`/api/forms/${formId}`)
   )
@@ -88,14 +109,14 @@ export default function BuilderPage({ params }: PageProps) {
           throw new Error('Form data not available')
         }
 
-        const existingFieldIds = new Set(formData.fields.map((f: any) => f.id))
+        const existingFieldIds = new Set(formData.fields.map((f) => f.id))
         const currentFieldIds = new Set(state.fields.map((f) => f.id))
 
         // Identify new, updated, and deleted fields
         const newFields = state.fields.filter((f) => !existingFieldIds.has(f.id))
         const updatedFields = state.fields.filter((f) => existingFieldIds.has(f.id))
         const deletedFieldIds = formData.fields
-          .map((f: any) => f.id)
+          .map((f) => f.id)
           .filter((id: string) => !currentFieldIds.has(id))
 
         // Execute API calls for each operation
@@ -191,7 +212,7 @@ export default function BuilderPage({ params }: PageProps) {
         formId: formData?.id,
         name: formData?.name || '',
         description: formData?.description || '',
-        fields: (formData?.fields || []).map((field: any): FormField => ({
+        fields: (formData?.fields || []).map((field): FormField => ({
           id: field.id,
           type: field.type,
           label: field.label,
@@ -200,8 +221,8 @@ export default function BuilderPage({ params }: PageProps) {
           required: field.required,
           order: field.order,
           options: field.options || undefined,
-          min: field.min || undefined,
-          max: field.max || undefined,
+          min: field.min ?? undefined,
+          max: field.max ?? undefined,
           validation: field.validation || undefined,
         })),
       }

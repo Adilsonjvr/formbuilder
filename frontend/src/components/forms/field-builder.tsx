@@ -3,7 +3,6 @@
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { FormField } from '@/types/form-builder'
-import { FieldType } from '@/lib/constants'
 import { FieldItem } from './field-item'
 import { FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -11,8 +10,6 @@ import { cn } from '@/lib/utils'
 interface FieldBuilderProps {
   fields: FormField[]
   activeFieldId: string | null
-  onAddField: (fieldType: FieldType, index?: number) => void
-  onReorderFields: (startIndex: number, endIndex: number) => void
   onSelectField: (fieldId: string) => void
   onRemoveField: (fieldId: string) => void
   onDuplicateField: (fieldId: string) => void
@@ -21,8 +18,6 @@ interface FieldBuilderProps {
 export function FieldBuilder({
   fields,
   activeFieldId,
-  onAddField,
-  onReorderFields,
   onSelectField,
   onRemoveField,
   onDuplicateField,
