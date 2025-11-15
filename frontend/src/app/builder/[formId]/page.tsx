@@ -57,12 +57,14 @@ export default function BuilderPage({ params }: PageProps) {
                   label: field.label,
                   required: field.required,
                   order: field.order,
-                  placeholder: field.placeholder,
-                  helpText: field.helpText,
-                  options: field.options,
-                  min: field.min,
-                  max: field.max,
-                  validation: field.validation,
+                  settings: {
+                    placeholder: field.placeholder,
+                    helpText: field.helpText,
+                    options: field.options,
+                    min: field.min,
+                    max: field.max,
+                    validation: field.validation,
+                  },
                 }),
               })
             )
@@ -81,8 +83,82 @@ export default function BuilderPage({ params }: PageProps) {
           }),
         })
 
-        // TODO: Sync fields (add new, update existing, remove deleted)
-        // For now, just show success
+        // Sync fields: compare existing with new
+        if (!formData) {
+          throw new Error('Form data not available')
+        }
+
+        const existingFieldIds = new Set(formData.fields.map((f: any) => f.id))
+        const currentFieldIds = new Set(state.fields.map((f) => f.id))
+
+        // Identify new, updated, and deleted fields
+        const newFields = state.fields.filter((f) => !existingFieldIds.has(f.id))
+        const updatedFields = state.fields.filter((f) => existingFieldIds.has(f.id))
+        const deletedFieldIds = formData.fields
+          .map((f: any) => f.id)
+          .filter((id: string) => !currentFieldIds.has(id))
+
+        // Execute API calls for each operation
+        const operations = []
+
+        // Add new fields
+        for (const field of newFields) {
+          operations.push(
+            api(`/api/forms/${formId}/fields`, {
+              method: 'POST',
+              body: JSON.stringify({
+                type: field.type,
+                label: field.label,
+                required: field.required,
+                order: field.order,
+                settings: {
+                  placeholder: field.placeholder,
+                  helpText: field.helpText,
+                  options: field.options,
+                  min: field.min,
+                  max: field.max,
+                  validation: field.validation,
+                },
+              }),
+            })
+          )
+        }
+
+        // Update existing fields
+        for (const field of updatedFields) {
+          operations.push(
+            api(`/api/forms/${formId}/fields/${field.id}`, {
+              method: 'PUT',
+              body: JSON.stringify({
+                type: field.type,
+                label: field.label,
+                required: field.required,
+                order: field.order,
+                settings: {
+                  placeholder: field.placeholder,
+                  helpText: field.helpText,
+                  options: field.options,
+                  min: field.min,
+                  max: field.max,
+                  validation: field.validation,
+                },
+              }),
+            })
+          )
+        }
+
+        // Delete removed fields
+        for (const fieldId of deletedFieldIds) {
+          operations.push(
+            api(`/api/forms/${formId}/fields/${fieldId}`, {
+              method: 'DELETE',
+            })
+          )
+        }
+
+        // Execute all operations in parallel
+        await Promise.all(operations)
+
         toast.success('Formulário salvo com sucesso!')
       }
     } catch (error) {

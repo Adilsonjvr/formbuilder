@@ -4,7 +4,7 @@ import { use } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Calendar, MapPin } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, Download } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -95,6 +95,30 @@ export default function ResponsesPage({ params }: PageProps) {
     })
   }
 
+  const handleExport = async (format: 'csv' | 'json') => {
+    try {
+      const response = await fetch(`/api/forms/${id}/export?format=${format}`, {
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to export')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${formData?.name || 'formulario'}-respostas.${format}`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Export error:', error)
+    }
+  }
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -153,6 +177,33 @@ export default function ResponsesPage({ params }: PageProps) {
                 responsesData?.total || 0
               )}
             </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="md:col-span-2">
+          <CardHeader className="pb-3">
+            <CardDescription>Exportar Respostas</CardDescription>
+            <div className="flex gap-2 mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport('csv')}
+                disabled={!responsesData?.items || responsesData.items.length === 0}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Exportar CSV
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport('json')}
+                disabled={!responsesData?.items || responsesData.items.length === 0}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Exportar JSON
+              </Button>
+            </div>
           </CardHeader>
         </Card>
       </div>

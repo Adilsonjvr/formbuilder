@@ -21,7 +21,7 @@ export async function POST(
       return NextResponse.json({ message }, { status: 400 });
     }
 
-    const { type, label, required, order } = validation.data;
+    const { type, label, required, order, settings } = validation.data;
 
     const form = await prisma.form.findFirst({
       where: { id: formId, userId: user.id, deletedAt: null },
@@ -32,7 +32,7 @@ export async function POST(
     }
 
     const field = await prisma.formField.create({
-      data: { formId, type, label, required, order, createdAt: new Date() },
+      data: { formId, type, label, required, order, settings, createdAt: new Date() },
     });
 
     logger.info('field_created', { userId: user.id, formId, fieldId: field.id });

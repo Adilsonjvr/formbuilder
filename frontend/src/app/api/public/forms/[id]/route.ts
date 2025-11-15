@@ -27,11 +27,29 @@ export async function GET(
       );
     }
 
+    // Flatten settings for each field
+    const fields = (form.fields ?? []).map((field: any) => {
+      const settings = field.settings || {}
+      return {
+        id: field.id,
+        type: field.type,
+        label: field.label,
+        required: field.required,
+        order: field.order,
+        placeholder: settings.placeholder,
+        helpText: settings.helpText,
+        options: settings.options,
+        min: settings.min,
+        max: settings.max,
+        validation: settings.validation,
+      }
+    })
+
     return NextResponse.json({
       id: form.id,
       name: form.name,
       description: form.description,
-      fields: form.fields ?? [],
+      fields,
       createdAt: form.createdAt,
     });
   } catch (error) {

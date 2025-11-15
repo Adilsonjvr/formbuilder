@@ -44,6 +44,7 @@ model FormField {
   label     String
   required  Boolean  @default(false)
   order     Int
+  settings  Json?
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([formId])

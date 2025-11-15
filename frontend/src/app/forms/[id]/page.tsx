@@ -246,22 +246,60 @@ export default function PublicFormPage({ params }: PageProps) {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center p-4">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{
+            duration: 0.5,
+            type: 'spring',
+            stiffness: 200,
+            damping: 20
+          }}
+          className="w-full max-w-md"
         >
-          <Card className="w-full max-w-md text-center">
-            <CardHeader className="space-y-4">
-              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="h-8 w-8 text-primary" />
+          <Card className="text-center border-2">
+            <CardHeader className="space-y-6 pb-8">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  delay: 0.2,
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 15
+                }}
+                className="mx-auto w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center shadow-lg"
+              >
+                <CheckCircle2 className="h-10 w-10 text-primary-foreground" />
+              </motion.div>
+              <div className="space-y-2">
+                <CardTitle className="text-2xl">Resposta enviada!</CardTitle>
+                <CardDescription className="text-base">
+                  Obrigado por preencher este formulário. Sua resposta foi registrada com sucesso.
+                </CardDescription>
               </div>
-              <CardTitle>Resposta enviada!</CardTitle>
-              <CardDescription>
-                Obrigado por preencher este formulário. Sua resposta foi registrada com sucesso.
-              </CardDescription>
             </CardHeader>
+            <CardContent className="space-y-3 pb-6">
+              <Button
+                onClick={() => {
+                  setIsSubmitted(false)
+                  setFormValues({})
+                }}
+                className="w-full"
+                size="lg"
+              >
+                Enviar Outra Resposta
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/')}
+                className="w-full"
+                size="lg"
+              >
+                Voltar ao Início
+              </Button>
+            </CardContent>
           </Card>
         </motion.div>
       </div>
