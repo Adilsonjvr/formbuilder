@@ -70,5 +70,5 @@ export const sanitizeFieldSettingsInput = (
     result.validation = settings.validation
   }
 
-  return Object.keys(result).length > 0 ? result : {}
+  return ((Object.keys(result).length > 0 ? result : {}) as Prisma.InputJsonValue)
 }
