@@ -15,6 +15,7 @@ import {
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { sanitizeText } from '@/lib/sanitize'
 
 interface AnalyticsField {
   id: string
@@ -230,7 +231,7 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
         if (!hasValueCounts && !hasAverage) return null
 
         const chartData = Object.entries(stat.valueCounts).map(([name, value]) => ({
-          name,
+          name: sanitizeText(name),
           value,
         }))
 
@@ -239,7 +240,7 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>{stat.field.label}</CardTitle>
+                  <CardTitle>{sanitizeText(stat.field.label)}</CardTitle>
                   <CardDescription>
                     {stat.totalResponses} resposta{stat.totalResponses !== 1 ? 's' : ''}
                   </CardDescription>

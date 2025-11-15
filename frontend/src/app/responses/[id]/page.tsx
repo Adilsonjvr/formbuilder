@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { toast } from 'sonner'
+import { sanitizeText } from '@/lib/sanitize'
 import { ResponseAnalytics } from '@/components/analytics/response-analytics'
 
 interface FormField {
@@ -189,7 +190,7 @@ export default function ResponsesPage({ params }: PageProps) {
     if (typeof field.value === 'boolean') {
       return field.value ? 'Sim' : 'Não'
     }
-    return String(field.value)
+    return sanitizeText(String(field.value))
   }
 
   const highlightMatches = (text: string) => {
@@ -324,9 +325,9 @@ export default function ResponsesPage({ params }: PageProps) {
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-bold tracking-tight">{formData?.name}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{sanitizeText(formData?.name)}</h1>
             {formData?.description && (
-              <p className="text-muted-foreground">{formData.description}</p>
+              <p className="text-muted-foreground">{sanitizeText(formData.description)}</p>
             )}
           </>
         )}
@@ -540,7 +541,7 @@ export default function ResponsesPage({ params }: PageProps) {
                   <TableRow>
                     <TableHead className="w-[180px]">Data/Hora</TableHead>
                     {formData?.fields.map((field) => (
-                      <TableHead key={field.id}>{field.label}</TableHead>
+                      <TableHead key={field.id}>{sanitizeText(field.label)}</TableHead>
                     ))}
                     <TableHead className="w-[120px]">IP</TableHead>
                     <TableHead className="w-[100px] text-right">Ações</TableHead>
@@ -568,7 +569,7 @@ export default function ResponsesPage({ params }: PageProps) {
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-4 w-4" />
                             <span className="font-mono text-xs">
-                              {highlightMatches(response.ip ?? '')}
+                              {highlightMatches(sanitizeText(response.ip ?? ''))}
                             </span>
                           </div>
                         ) : (

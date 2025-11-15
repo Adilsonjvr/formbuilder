@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FieldRenderer } from './renderers/field-renderer'
 import { FormBuilderState } from '@/types/form-builder'
 import { fadeIn, transitions } from '@/lib/motion'
+import { sanitizeText } from '@/lib/sanitize'
 
 interface FormPreviewProps {
   open: boolean
@@ -58,11 +59,11 @@ export function FormPreview({ open, onClose, formState }: FormPreviewProps) {
             <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle className="text-3xl">
-                  {formState.name || 'Sem título'}
+                  {sanitizeText(formState.name) || 'Sem título'}
                 </CardTitle>
                 {formState.description && (
                   <CardDescription className="text-base mt-2">
-                    {formState.description}
+                    {sanitizeText(formState.description)}
                   </CardDescription>
                 )}
               </CardHeader>

@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
+import { sanitizeText } from '@/lib/sanitize'
 
 interface FormField {
   id: string
@@ -326,10 +327,10 @@ export default function PublicFormPage({ params }: PageProps) {
       >
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">{formData?.name}</CardTitle>
+            <CardTitle className="text-2xl">{sanitizeText(formData?.name)}</CardTitle>
             {formData?.description && (
               <CardDescription className="text-base">
-                {formData.description}
+                {sanitizeText(formData.description)}
               </CardDescription>
             )}
           </CardHeader>
@@ -339,13 +340,13 @@ export default function PublicFormPage({ params }: PageProps) {
                 <div key={field.id} className="space-y-2">
                   {field.type !== 'checkbox' && (
                     <Label htmlFor={field.id}>
-                      {field.label}
+                      {sanitizeText(field.label)}
                       {field.required && <span className="text-destructive ml-1">*</span>}
                     </Label>
                   )}
                   {renderField(field)}
                   {field.helpText && (
-                    <p className="text-sm text-muted-foreground">{field.helpText}</p>
+                    <p className="text-sm text-muted-foreground">{sanitizeText(field.helpText)}</p>
                   )}
                 </div>
               ))}

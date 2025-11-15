@@ -18,6 +18,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import dynamic from 'next/dynamic'
 import type { UploadedFile } from '@/lib/upload'
+import { sanitizeText } from '@/lib/sanitize'
 
 const FileUpload = dynamic(
   () => import('@/components/forms/file-upload').then((mod) => mod.FileUpload),
@@ -40,6 +41,8 @@ export function FieldRenderer({
   const [hoverRating, setHoverRating] = useState<number | null>(null)
 
   const renderInput = () => {
+    const sanitizedPlaceholder = sanitizeText(field.placeholder)
+    const placeholderValue = sanitizedPlaceholder || undefined
     const stringValue = typeof value === 'string' ? value : ''
     const numberValue = typeof value === 'number' ? value : undefined
     switch (field.type) {
@@ -48,7 +51,7 @@ export function FieldRenderer({
           <Input
             value={stringValue}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.placeholder}
+            placeholder={placeholderValue}
             required={field.required}
             minLength={field.validation?.minLength}
             maxLength={field.validation?.maxLength}
@@ -61,7 +64,7 @@ export function FieldRenderer({
             type="email"
             value={stringValue}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.placeholder}
+            placeholder={placeholderValue}
             required={field.required}
           />
         )
@@ -72,7 +75,7 @@ export function FieldRenderer({
             type="number"
             value={stringValue}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.placeholder}
+            placeholder={placeholderValue}
             required={field.required}
             min={field.min}
             max={field.max}
@@ -103,12 +106,12 @@ export function FieldRenderer({
         return (
           <Select value={stringValue} onValueChange={(val) => onChange(val)}>
             <SelectTrigger>
-              <SelectValue placeholder={field.placeholder || 'Selecione uma opção'} />
+              <SelectValue placeholder={placeholderValue || 'Selecione uma opção'} />
             </SelectTrigger>
             <SelectContent>
               {field.options?.map((option, idx) => (
                 <SelectItem key={idx} value={option}>
-                  {option}
+                  {sanitizeText(option)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -122,7 +125,7 @@ export function FieldRenderer({
               <div key={idx} className="flex items-center space-x-2">
                 <RadioGroupItem value={option} id={`${field.id}-${idx}`} />
                 <Label htmlFor={`${field.id}-${idx}`} className="font-normal">
-                  {option}
+                  {sanitizeText(option)}
                 </Label>
               </div>
             ))}
@@ -152,7 +155,7 @@ export function FieldRenderer({
                     }}
                   />
                   <Label htmlFor={`${field.id}-${idx}`} className="font-normal">
-                    {option}
+                    {sanitizeText(option)}
                   </Label>
                 </div>
               )
@@ -236,7 +239,7 @@ export function FieldRenderer({
           <Textarea
             value={stringValue}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.placeholder}
+            placeholder={placeholderValue}
             required={field.required}
             rows={4}
           />
@@ -247,12 +250,12 @@ export function FieldRenderer({
   return (
     <div className="space-y-2">
       <Label htmlFor={field.id} className="text-base">
-        {field.label}
+        {sanitizeText(field.label)}
         {field.required && <span className="text-destructive ml-1">*</span>}
       </Label>
       {renderInput()}
       {field.helpText && (
-        <p className="text-sm text-muted-foreground">{field.helpText}</p>
+        <p className="text-sm text-muted-foreground">{sanitizeText(field.helpText)}</p>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
