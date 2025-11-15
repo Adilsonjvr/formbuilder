@@ -13,7 +13,7 @@ const parseResponseData = (data: Prisma.JsonValue): ResponseEntry[] => {
     return []
   }
 
-  return data.filter((entry): entry is ResponseEntry => {
+  return (data as unknown[]).filter((entry): entry is ResponseEntry => {
     if (!entry || typeof entry !== 'object') return false
     const candidate = entry as { fieldId?: unknown }
     return typeof candidate.fieldId === 'string'
