@@ -53,7 +53,7 @@ export default function PublicFormPage({ params }: PageProps) {
 
   const { data: formData, isLoading, error } = useSWR<FormData>(
     `/api/public/forms/${id}`,
-    () => api(`/api/public/forms/${id}`)
+    (url: string) => api<FormData>(url)
   )
 
   const handleFieldChange = (fieldId: string, value: unknown) => {
