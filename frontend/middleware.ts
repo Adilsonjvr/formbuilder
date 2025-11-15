@@ -35,7 +35,8 @@ const getClientIp = (request: NextRequest) => {
   if (forwardedFor) {
     return forwardedFor.split(',')[0]?.trim()
   }
-  return request.ip ?? 'unknown'
+  const requestIp = (request as NextRequest & { ip?: string }).ip
+  return requestIp ?? 'unknown'
 }
 
 const isRateLimited = (key: string) => {
