@@ -44,7 +44,7 @@ export default function BuilderPage({ params }: PageProps) {
   // Fetch existing form data if editing
   const { data: formData, isLoading, error } = useSWR<BuilderFormResponse>(
     !isNew ? `/api/forms/${formId}` : null,
-    () => api(`/api/forms/${formId}`)
+    (url: string) => api<BuilderFormResponse>(url)
   )
 
   // Redirect to login if unauthorized
