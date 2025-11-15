@@ -29,8 +29,9 @@ interface FormsResponse {
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { data, error, isLoading, mutate } = useSWR<FormsResponse>('/api/forms', () =>
-    api('/api/forms')
+  const { data, error, isLoading, mutate } = useSWR<FormsResponse>(
+    '/api/forms',
+    (url: string) => api<FormsResponse>(url)
   )
 
   // Redirect to login if unauthorized
