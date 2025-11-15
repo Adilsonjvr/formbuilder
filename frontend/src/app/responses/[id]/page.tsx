@@ -88,7 +88,7 @@ export default function ResponsesPage({ params }: PageProps) {
 
   const { data: formData, isLoading: formLoading, error: formError } = useSWR<FormData>(
     `/api/forms/${id}`,
-    () => api(`/api/forms/${id}`)
+    (url: string) => api<FormData>(url)
   )
 
   const queryParams = new URLSearchParams({
@@ -126,7 +126,7 @@ export default function ResponsesPage({ params }: PageProps) {
 
   const { data: responsesData, isLoading: responsesLoading, error: responsesError, mutate } = useSWR<ResponsesData>(
     responsesEndpoint,
-    () => api(responsesEndpoint)
+    (url: string) => api<ResponsesData>(url)
   )
 
   useEffect(() => {
