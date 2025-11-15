@@ -188,7 +188,7 @@ export default function ResponsesPage({ params }: PageProps) {
   }
 
   return (
-    <div className="container pt-16 pb-12 space-y-8">
+    <div className="container max-w-6xl px-6 lg:px-8 pt-16 pb-12 space-y-8">
       {/* Header */}
       <div className="space-y-4">
         <Button

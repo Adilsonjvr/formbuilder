@@ -66,6 +66,13 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: 'desc' },
         skip: offset,
         take: limit,
+        include: {
+          _count: {
+            select: {
+              responses: true,
+            },
+          },
+        },
       }),
       prisma.form.count({
         where: {
