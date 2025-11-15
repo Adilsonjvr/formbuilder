@@ -55,18 +55,20 @@ export async function PUT(
     }
 
     // Update field
+    const data: Prisma.FormFieldUpdateInput = {
+      type: body.type ?? existingField.type,
+      label: sanitizedLabel ?? existingField.label,
+      required: body.required ?? existingField.required,
+      order: body.order ?? existingField.order,
+    }
+
+    if (sanitizedSettings !== undefined) {
+      data.settings = sanitizedSettings as Prisma.JsonValue
+    }
+
     const updatedField = await prisma.formField.update({
       where: { id: fieldId },
-      data: {
-        type: body.type ?? existingField.type,
-        label: sanitizedLabel ?? existingField.label,
-        required: body.required ?? existingField.required,
-        order: body.order ?? existingField.order,
-        settings:
-          sanitizedSettings !== undefined
-            ? (sanitizedSettings as Prisma.JsonValue)
-            : existingField.settings,
-      },
+      data,
     });
 
     logger.info('field_updated', { userId: user.id, formId, fieldId });
