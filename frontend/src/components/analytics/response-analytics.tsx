@@ -12,6 +12,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LineChart,
+  Line,
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -34,6 +36,9 @@ interface Response {
   id: string
   data: ResponseDataEntry[]
   createdAt: string
+  metadata?: {
+    durationMs?: number
+  }
 }
 
 interface ResponseAnalyticsProps {
@@ -56,6 +61,22 @@ const getFieldType = (field: AnalyticsField) => field.type.toUpperCase()
 
 const getFieldValue = (response: Response, fieldId: string) =>
   response.data.find((entry) => entry.fieldId === fieldId)?.value
+
+const formatDuration = (milliseconds: number) => {
+  if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+    return 'N/A'
+  }
+
+  const totalSeconds = Math.round(milliseconds / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  if (minutes === 0) {
+    return `${seconds}s`
+  }
+
+  return `${minutes}m ${seconds.toString().padStart(2, '0')}s`
+}
 
 export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps) {
   // Calculate field statistics
@@ -156,6 +177,19 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
     return Math.round((completeResponses.length / responses.length) * 100)
   }, [fields, responses])
 
+  const averageCompletionMs = useMemo(() => {
+    const durations = responses
+      .map((response) => response.metadata?.durationMs)
+      .filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0)
+
+    if (durations.length === 0) {
+      return 0
+    }
+
+    const sum = durations.reduce((acc, value) => acc + value, 0)
+    return sum / durations.length
+  }, [responses])
+
   if (responses.length === 0) {
     return (
       <Card>
@@ -171,7 +205,7 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Total de Respostas</CardDescription>
@@ -192,6 +226,15 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
             <CardTitle className="text-3xl">{fields.length}</CardTitle>
           </CardHeader>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Tempo Médio de Preenchimento</CardDescription>
+            <CardTitle className="text-3xl">
+              {averageCompletionMs > 0 ? formatDuration(averageCompletionMs) : 'N/A'}
+            </CardTitle>
+          </CardHeader>
+        </Card>
       </div>
 
       {/* Responses Over Time */}
@@ -202,13 +245,13 @@ export function ResponseAnalytics({ fields, responses }: ResponseAnalyticsProps)
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={responsesOverTime}>
+            <LineChart data={responsesOverTime}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
-              <YAxis />
+              <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="count" fill="hsl(var(--primary))" />
-            </BarChart>
+              <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4 }} />
+            </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>

@@ -57,6 +57,7 @@ model FormResponse {
   userId    String?  @map("user_id")
   ip        String?  @map("ip")
   data      Json
+  metadata  Json?
   createdAt DateTime @default(now()) @map("created_at")
   deletedAt DateTime? @map("deleted_at")
 

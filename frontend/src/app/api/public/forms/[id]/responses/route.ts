@@ -9,6 +9,10 @@ type SubmittedField = {
   value: unknown
 }
 
+type ResponseMetadata = {
+  durationMs?: number
+}
+
 const sanitizeResponseValue = (value: unknown): unknown => {
   if (typeof value === 'string') {
     return sanitizeRequiredString(value)
@@ -39,6 +43,26 @@ const parseSubmittedFields = (payload: unknown): SubmittedField[] => {
       fieldId: (item as { fieldId: string }).fieldId,
       value: sanitizeResponseValue((item as { value: unknown }).value ?? null),
     }))
+}
+
+const parseMetadata = (payload: unknown): ResponseMetadata | undefined => {
+  if (!payload || typeof payload !== 'object') {
+    return undefined
+  }
+
+  const durationValue = (payload as { durationMs?: unknown }).durationMs
+  if (typeof durationValue === 'number' && Number.isFinite(durationValue) && durationValue >= 0) {
+    return { durationMs: Math.round(durationValue) }
+  }
+
+  if (typeof durationValue === 'string') {
+    const parsed = Number(durationValue)
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      return { durationMs: Math.round(parsed) }
+    }
+  }
+
+  return undefined
 }
 
 // Simple in-memory rate limiting for MVP
@@ -81,6 +105,9 @@ export async function POST(
     const submittedFields = parseSubmittedFields(
       body && typeof body === 'object' ? (body as { fields?: unknown }).fields : undefined
     );
+    const metadata = parseMetadata(
+      body && typeof body === 'object' ? (body as { metadata?: unknown }).metadata : undefined
+    )
 
     const form = await prisma.form.findFirst({
       where: { id: formId, deletedAt: null },
@@ -101,6 +128,7 @@ export async function POST(
       data: {
         formId,
         data: submittedFields as Prisma.JsonArray,
+        metadata: metadata ? (metadata as Prisma.JsonValue) : undefined,
         ip: ip !== 'unknown' ? ip : null,
         createdAt: new Date(),
       },

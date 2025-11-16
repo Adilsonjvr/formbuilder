@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { motion } from 'framer-motion'
@@ -51,11 +51,20 @@ export default function PublicFormPage({ params }: PageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [formValues, setFormValues] = useState<Record<string, unknown>>({})
+  const startTimeRef = useRef<number | null>(null)
 
-  const { data: formData, isLoading, error } = useSWR<FormData>(
-    `/api/public/forms/${id}`,
-    (url: string) => api<FormData>(url)
-  )
+const { data: formData, isLoading, error } = useSWR<FormData>(
+  `/api/public/forms/${id}`,
+  (url: string) => api<FormData>(url)
+)
+
+useEffect(() => {
+  if (typeof performance !== 'undefined') {
+    startTimeRef.current = performance.now()
+  } else {
+    startTimeRef.current = null
+  }
+}, [id])
 
   const handleFieldChange = (fieldId: string, value: unknown) => {
     setFormValues((prev) => ({
@@ -94,13 +103,26 @@ export default function PublicFormPage({ params }: PageProps) {
         value: formValues[field.id] ?? null,
       }))
 
+      let durationMs: number | undefined
+      if (typeof performance !== 'undefined' && startTimeRef.current !== null) {
+        durationMs = Math.max(0, Math.round(performance.now() - startTimeRef.current))
+      }
+
+      const payload: Record<string, unknown> = { fields }
+      if (durationMs !== undefined && Number.isFinite(durationMs)) {
+        payload.metadata = { durationMs }
+      }
+
       await api(`/api/public/forms/${id}/responses`, {
         method: 'POST',
-        body: JSON.stringify({ fields }),
+        body: JSON.stringify(payload),
       })
 
       setIsSubmitted(true)
       toast.success('Resposta enviada com sucesso!')
+      if (typeof performance !== 'undefined') {
+        startTimeRef.current = performance.now()
+      }
     } catch (error) {
       console.error('Error submitting form:', error)
       toast.error('Erro ao enviar resposta. Tente novamente.')

@@ -44,10 +44,15 @@ interface ResponseData {
   value: unknown
 }
 
+interface ResponseMetadata {
+  durationMs?: number
+}
+
 interface Response {
   id: string
   data: ResponseData[]
   ip: string | null
+  metadata?: ResponseMetadata | null
   createdAt: string
 }
 
