@@ -32,7 +32,7 @@ interface ResponseDataEntry {
   value: unknown
 }
 
-interface Response {
+interface AnalyticsResponse {
   id: string
   data: ResponseDataEntry[]
   createdAt: string
@@ -43,7 +43,7 @@ interface Response {
 
 interface ResponseAnalyticsProps {
   fields: AnalyticsField[]
-  responses: Response[]
+  responses: AnalyticsResponse[]
 }
 
 const COLORS = [
@@ -59,7 +59,7 @@ const COLORS = [
 
 const getFieldType = (field: AnalyticsField) => field.type.toUpperCase()
 
-const getFieldValue = (response: Response, fieldId: string) =>
+const getFieldValue = (response: AnalyticsResponse, fieldId: string) =>
   response.data.find((entry) => entry.fieldId === fieldId)?.value
 
 const formatDuration = (milliseconds: number) => {
