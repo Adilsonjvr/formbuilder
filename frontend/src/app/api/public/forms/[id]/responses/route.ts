@@ -10,7 +10,7 @@ type SubmittedField = {
 }
 
 type ResponseMetadata = {
-  durationMs?: number
+  durationMs: number
 }
 
 const sanitizeResponseValue = (value: unknown): unknown => {

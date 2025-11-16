@@ -45,7 +45,7 @@ interface ResponseData {
 }
 
 interface ResponseMetadata {
-  durationMs?: number
+  durationMs: number
 }
 
 interface Response {
