@@ -38,7 +38,7 @@ interface AnalyticsResponse {
   createdAt: string
   metadata?: {
     durationMs?: number
-  }
+  } | null
 }
 
 interface ResponseAnalyticsProps {
