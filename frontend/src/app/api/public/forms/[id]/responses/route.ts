@@ -124,14 +124,19 @@ export async function POST(
       );
     }
 
+    const responseData: Prisma.FormResponseUncheckedCreateInput = {
+      formId,
+      data: submittedFields as Prisma.JsonArray,
+      ip: ip !== 'unknown' ? ip : null,
+      createdAt: new Date(),
+    }
+
+    if (metadata) {
+      responseData.metadata = metadata as Prisma.JsonValue
+    }
+
     const response = await prisma.formResponse.create({
-      data: {
-        formId,
-        data: submittedFields as Prisma.JsonArray,
-        ...(metadata ? { metadata: metadata as Prisma.JsonValue } : {}),
-        ip: ip !== 'unknown' ? ip : null,
-        createdAt: new Date(),
-      },
+      data: responseData,
     });
 
     logger.info('response_submitted', { formId, responseId: response.id });
