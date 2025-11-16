@@ -128,7 +128,7 @@ export async function POST(
       data: {
         formId,
         data: submittedFields as Prisma.JsonArray,
-        metadata: metadata ? (metadata as Prisma.JsonValue) : Prisma.DbNull,
+        ...(metadata ? { metadata: metadata as Prisma.JsonValue } : {}),
         ip: ip !== 'unknown' ? ip : null,
         createdAt: new Date(),
       },
