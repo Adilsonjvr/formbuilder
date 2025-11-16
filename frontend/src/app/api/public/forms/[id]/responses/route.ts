@@ -132,7 +132,7 @@ export async function POST(
     }
 
     if (metadata) {
-      responseData.metadata = metadata as Prisma.JsonValue
+      responseData.metadata = JSON.parse(JSON.stringify(metadata)) as Prisma.InputJsonValue
     }
 
     const response = await prisma.formResponse.create({
