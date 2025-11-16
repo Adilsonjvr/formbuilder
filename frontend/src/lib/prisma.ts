@@ -16,6 +16,24 @@ export const prisma =
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
+let metadataColumnEnsured = false;
+
+export const ensureResponseMetadataColumn = async () => {
+  if (metadataColumnEnsured) {
+    return;
+  }
+
+  try {
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE "FormResponse"
+      ADD COLUMN IF NOT EXISTS "metadata" JSONB
+    `);
+    metadataColumnEnsured = true;
+  } catch (error) {
+    console.error('Failed to ensure metadata column exists:', error);
+  }
+};
+
 // Graceful shutdown for serverless
 if (process.env.NODE_ENV === 'production') {
   process.on('beforeExit', async () => {

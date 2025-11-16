@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import prisma, { ensureResponseMetadataColumn } from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 import logger from '@/lib/logger';
 import { parseFieldSettings } from '@/lib/field-settings';
@@ -10,6 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await ensureResponseMetadataColumn()
     const user = await getAuthUser(req);
     requireAuth(user);
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import prisma, { ensureResponseMetadataColumn } from '@/lib/prisma';
 import { getAuthUser, requireAuth } from '@/lib/auth';
 import { CreateFormDTO } from '@/lib/dtos/form.dto';
 import logger from '@/lib/logger';
@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    await ensureResponseMetadataColumn()
     const user = await getAuthUser(req);
     requireAuth(user);
 
