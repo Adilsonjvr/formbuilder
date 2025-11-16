@@ -24,6 +24,23 @@ export const ensureResponseMetadataColumn = async () => {
   }
 
   try {
+    const [{ exists }] =
+      await prisma.$queryRawUnsafe<{ exists: boolean }[]>(
+        `
+        SELECT EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_name = 'FormResponse'
+          AND column_name = 'metadata'
+        ) as exists
+        `
+      );
+
+    if (exists) {
+      metadataColumnEnsured = true;
+      return;
+    }
+
     await prisma.$executeRawUnsafe(`
       ALTER TABLE "FormResponse"
       ADD COLUMN IF NOT EXISTS "metadata" JSONB
