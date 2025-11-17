@@ -36,6 +36,8 @@ interface FormData {
   name: string
   description: string | null
   fields: FormField[]
+  primaryColor?: string | null
+  accentColor?: string | null
   createdAt: string
 }
 
@@ -278,8 +280,16 @@ useEffect(() => {
   }
 
   if (isSubmitted) {
+    const primaryColor = formData?.primaryColor || '#3b82f6'
+    const accentColor = formData?.accentColor || '#8b5cf6'
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center p-4">
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{
+          background: `linear-gradient(to bottom right, ${primaryColor}08, transparent, ${accentColor}10)`
+        }}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -302,9 +312,12 @@ useEffect(() => {
                   stiffness: 300,
                   damping: 15
                 }}
-                className="mx-auto w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center shadow-lg"
+                className="mx-auto w-20 h-20 rounded-full flex items-center justify-center shadow-lg"
+                style={{
+                  background: `linear-gradient(to bottom right, ${primaryColor}, ${accentColor})`
+                }}
               >
-                <CheckCircle2 className="h-10 w-10 text-primary-foreground" />
+                <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
               <div className="space-y-2">
                 <CardTitle className="text-2xl">Resposta enviada!</CardTitle>
@@ -321,6 +334,7 @@ useEffect(() => {
                 }}
                 className="w-full"
                 size="lg"
+                style={{ backgroundColor: primaryColor }}
               >
                 Enviar Outra Resposta
               </Button>
@@ -339,8 +353,16 @@ useEffect(() => {
     )
   }
 
+  const primaryColor = formData?.primaryColor || '#3b82f6'
+  const accentColor = formData?.accentColor || '#8b5cf6'
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: `linear-gradient(to bottom, transparent, ${primaryColor}10)`
+      }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -374,7 +396,12 @@ useEffect(() => {
               ))}
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" size="lg" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={isSubmitting}
+                  style={{ backgroundColor: primaryColor }}
+                >
                   {isSubmitting ? 'Enviando...' : 'Enviar Resposta'}
                 </Button>
               </div>

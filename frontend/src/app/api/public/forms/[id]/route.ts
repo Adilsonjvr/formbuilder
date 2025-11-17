@@ -51,6 +51,8 @@ export async function GET(
       name: form.name,
       description: form.description,
       fields,
+      primaryColor: form.primaryColor,
+      accentColor: form.accentColor,
       createdAt: form.createdAt,
     });
   } catch (error) {

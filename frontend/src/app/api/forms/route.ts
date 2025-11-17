@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         enableNotifications: validation.data.enableNotifications || false,
         notificationEmail: sanitizedEmail,
+        primaryColor: validation.data.primaryColor,
+        accentColor: validation.data.accentColor,
       },
     });
 

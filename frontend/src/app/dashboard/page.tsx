@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, FileText } from 'lucide-react'
 import { api } from '@/lib/api'
 import { FormCard } from '@/components/forms/form-card'
+import { StatsCards } from '@/components/dashboard/stats-cards'
+import { RecentActivity } from '@/components/dashboard/recent-activity'
+import { TopForms } from '@/components/dashboard/top-forms'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { staggerContainer, staggerItem, transitions } from '@/lib/motion'
@@ -27,11 +30,37 @@ interface FormsResponse {
   limit: number
 }
 
+interface DashboardStats {
+  stats: {
+    totalForms: number
+    totalResponses: number
+    averageResponsesPerForm: number
+    completionRate: number
+  }
+  activities: Array<{
+    id: string
+    type: 'form_created' | 'response_received'
+    formName: string
+    timestamp: string
+    responseCount?: number
+  }>
+  topForms: Array<{
+    id: string
+    name: string
+    responseCount: number
+  }>
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const { data, error, isLoading, mutate } = useSWR<FormsResponse>(
     '/api/forms',
     (url: string) => api<FormsResponse>(url)
+  )
+
+  const { data: statsData, isLoading: statsLoading } = useSWR<DashboardStats>(
+    '/api/dashboard/stats',
+    (url: string) => api<DashboardStats>(url)
   )
 
   // Redirect to login if unauthorized
@@ -103,7 +132,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Meus Formulários</h1>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground text-base">
             Gerencie e acompanhe seus formulários
           </p>
@@ -117,6 +146,28 @@ export default function DashboardPage() {
           Criar Formulário
         </Button>
       </div>
+
+      {/* Stats Cards */}
+      {statsLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-[120px] w-full rounded-xl" />
+          ))}
+        </div>
+      ) : statsData ? (
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
+          <StatsCards
+            totalForms={statsData.stats.totalForms}
+            totalResponses={statsData.stats.totalResponses}
+            averageResponsesPerForm={statsData.stats.averageResponsesPerForm}
+            completionRate={statsData.stats.completionRate}
+          />
+        </motion.div>
+      ) : null}
 
       {/* Loading State */}
       {isLoading && (
@@ -153,45 +204,65 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
-      {/* Forms Grid */}
+      {/* Main Content - Grid with forms and sidebar */}
       {!isLoading && data?.items && data.items.length > 0 && (
-        <motion.div
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-          className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
-        >
-          <AnimatePresence>
-            {data.items.map((form) => (
-              <motion.div
-                key={form.id}
-                variants={staggerItem}
-                transition={transitions.base}
-              >
-                <FormCard
-                  id={form.id}
-                  name={form.name}
-                  description={form.description || undefined}
-                  createdAt={form.createdAt}
-                  responseCount={form._count?.responses || 0}
-                  status="draft"
-                  onEdit={handleEdit}
-                  onViewResponses={handleViewResponses}
-                  onShare={handleShare}
-                  onDelete={handleDelete}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-      )}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Forms Grid - Takes 2 columns */}
+          <div className="lg:col-span-2">
+            <h2 className="text-xl font-semibold mb-4">Meus Formulários</h2>
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="grid gap-6 sm:grid-cols-1 md:grid-cols-2"
+            >
+              <AnimatePresence>
+                {data.items.map((form) => (
+                  <motion.div
+                    key={form.id}
+                    variants={staggerItem}
+                    transition={transitions.base}
+                  >
+                    <FormCard
+                      id={form.id}
+                      name={form.name}
+                      description={form.description || undefined}
+                      createdAt={form.createdAt}
+                      responseCount={form._count?.responses || 0}
+                      status="draft"
+                      onEdit={handleEdit}
+                      onViewResponses={handleViewResponses}
+                      onShare={handleShare}
+                      onDelete={handleDelete}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
 
-      {/* Pagination Info */}
-      {data && data.total > 0 && (
-        <div className="flex items-center justify-between pt-4 border-t">
-          <p className="text-sm text-muted-foreground">
-            Mostrando {data.items.length} de {data.total} formulários
-          </p>
+            {/* Pagination Info */}
+            {data.total > 0 && (
+              <div className="flex items-center justify-between pt-6 mt-6 border-t">
+                <p className="text-sm text-muted-foreground">
+                  Mostrando {data.items.length} de {data.total} formulários
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar - Takes 1 column */}
+          <div className="space-y-6">
+            {statsData && statsData.topForms.length > 0 && (
+              <TopForms
+                forms={statsData.topForms}
+                onViewForm={handleViewResponses}
+              />
+            )}
+
+            {statsData && statsData.activities.length > 0 && (
+              <RecentActivity activities={statsData.activities} />
+            )}
+          </div>
         </div>
       )}
     </div>

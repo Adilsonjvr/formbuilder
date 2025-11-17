@@ -14,10 +14,19 @@ export function useFormBuilder(initialState?: Partial<FormBuilderState>) {
     formId: initialState?.formId,
     enableNotifications: initialState?.enableNotifications || false,
     notificationEmail: initialState?.notificationEmail || '',
+    primaryColor: initialState?.primaryColor || '#3b82f6',
+    accentColor: initialState?.accentColor || '#8b5cf6',
   })
 
   const updateFormInfo = useCallback(
-    (updates: { name?: string; description?: string; enableNotifications?: boolean; notificationEmail?: string }) => {
+    (updates: {
+      name?: string
+      description?: string
+      enableNotifications?: boolean
+      notificationEmail?: string
+      primaryColor?: string
+      accentColor?: string
+    }) => {
       setState((prev) => ({ ...prev, ...updates }))
     },
     []

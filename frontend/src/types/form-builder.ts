@@ -26,6 +26,8 @@ export interface FormBuilderState {
   activeFieldId: string | null
   enableNotifications: boolean
   notificationEmail: string
+  primaryColor: string
+  accentColor: string
 }
 
 export interface DragItem {

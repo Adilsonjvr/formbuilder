@@ -11,7 +11,7 @@ import {
   useSensors,
   closestCenter,
 } from '@dnd-kit/core'
-import { Save, Eye, ArrowLeft } from 'lucide-react'
+import { Save, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,7 @@ import { FieldBuilder } from '@/components/forms/field-builder'
 import { FieldSettings } from '@/components/forms/field-settings'
 import { FormPreview } from '@/components/forms/form-preview'
 import { FormSettingsDialog } from '@/components/forms/form-settings-dialog'
+import { LivePreviewPanel } from '@/components/forms/live-preview-panel'
 import { useFormBuilder } from '@/hooks/use-form-builder'
 import { FormBuilderState } from '@/types/form-builder'
 import { FieldType } from '@/lib/constants'
@@ -34,6 +35,7 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [showLivePreview, setShowLivePreview] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const {
@@ -135,8 +137,28 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
             <FormSettingsDialog
               enableNotifications={state.enableNotifications}
               notificationEmail={state.notificationEmail}
+              primaryColor={state.primaryColor}
+              accentColor={state.accentColor}
               onUpdate={updateFormInfo}
             />
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowLivePreview(!showLivePreview)}
+            >
+              {showLivePreview ? (
+                <>
+                  <EyeOff className="h-4 w-4" />
+                  Ocultar Preview
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4" />
+                  Mostrar Preview
+                </>
+              )}
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -144,7 +166,7 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
               onClick={() => setShowPreview(true)}
             >
               <Eye className="h-4 w-4" />
-              Visualizar
+              Preview Modal
             </Button>
             <Button
               onClick={handleSave}
@@ -190,6 +212,11 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
             onDuplicateField={duplicateField}
           />
 
+          {/* Live Preview Panel - Right Side (when enabled) */}
+          {showLivePreview && (
+            <LivePreviewPanel formState={state} />
+          )}
+
           {/* Field Settings - Right Panel (Sheet) */}
           <FieldSettings
             field={activeField || null}
@@ -198,10 +225,18 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
           />
         </div>
 
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {draggedField ? (
-            <div className="bg-card border-2 border-primary rounded-lg p-4 shadow-lg">
-              <p className="font-medium">{draggedField.label}</p>
+            <div className="bg-card border-2 border-primary rounded-lg p-4 shadow-2xl scale-105 opacity-90 rotate-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-primary/10 text-primary">
+                  <Save className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{draggedField.label}</p>
+                  <p className="text-xs text-muted-foreground">Arrastando...</p>
+                </div>
+              </div>
             </div>
           ) : null}
         </DragOverlay>

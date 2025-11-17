@@ -29,6 +29,8 @@ model Form {
   responses            FormResponse[]
   enableNotifications  Boolean       @default(false) @map("enable_notifications")
   notificationEmail    String?       @map("notification_email")
+  primaryColor         String?       @default("#3b82f6") @map("primary_color")
+  accentColor          String?       @default("#8b5cf6") @map("accent_color")
   createdAt            DateTime      @default(now()) @map("created_at")
   updatedAt            DateTime      @updatedAt @map("updated_at")
   deletedAt            DateTime?     @map("deleted_at")

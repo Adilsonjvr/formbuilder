@@ -30,6 +30,8 @@ interface BuilderFormResponse {
   fields: BuilderFormField[]
   enableNotifications: boolean
   notificationEmail: string | null
+  primaryColor: string | null
+  accentColor: string | null
 }
 
 interface PageProps {
@@ -66,6 +68,8 @@ export default function BuilderPage({ params }: PageProps) {
             description: state.description,
             enableNotifications: state.enableNotifications,
             notificationEmail: state.notificationEmail || null,
+            primaryColor: state.primaryColor,
+            accentColor: state.accentColor,
           }),
         })
 
@@ -107,6 +111,8 @@ export default function BuilderPage({ params }: PageProps) {
             description: state.description,
             enableNotifications: state.enableNotifications,
             notificationEmail: state.notificationEmail || null,
+            primaryColor: state.primaryColor,
+            accentColor: state.accentColor,
           }),
         })
 
@@ -220,6 +226,8 @@ export default function BuilderPage({ params }: PageProps) {
         description: formData?.description || '',
         enableNotifications: formData?.enableNotifications || false,
         notificationEmail: formData?.notificationEmail || '',
+        primaryColor: formData?.primaryColor || '#3b82f6',
+        accentColor: formData?.accentColor || '#8b5cf6',
         fields: (formData?.fields || []).map((field): FormField => ({
           id: field.id,
           type: field.type,

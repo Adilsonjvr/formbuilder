@@ -65,6 +65,8 @@ export async function GET(
       isPublic: false,
       enableNotifications: form.enableNotifications,
       notificationEmail: form.notificationEmail,
+      primaryColor: form.primaryColor,
+      accentColor: form.accentColor,
       createdAt: form.createdAt,
       stats,
     });
@@ -114,6 +116,8 @@ export async function PUT(
             ? body.enableNotifications
             : form.enableNotifications,
         notificationEmail: sanitizedEmail !== undefined ? sanitizedEmail : form.notificationEmail,
+        primaryColor: body.primaryColor !== undefined ? body.primaryColor : form.primaryColor,
+        accentColor: body.accentColor !== undefined ? body.accentColor : form.accentColor,
       },
     });
 

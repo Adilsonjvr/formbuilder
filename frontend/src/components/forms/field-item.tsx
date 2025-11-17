@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Copy, Trash2 } from 'lucide-react'
 import * as Icons from 'lucide-react'
+import { motion } from 'framer-motion'
 import { FormField } from '@/types/form-builder'
 import { FIELD_ICONS, FIELD_LABELS } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
@@ -34,6 +35,7 @@ export function FieldItem({
     transform,
     transition,
     isDragging,
+    isOver,
   } = useSortable({
     id: field.id,
     data: {
@@ -44,24 +46,35 @@ export function FieldItem({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+    transition: transition || 'transform 200ms ease',
+    opacity: isDragging ? 0.3 : 1,
   }
 
   const iconName = FIELD_ICONS[field.type] as keyof typeof Icons
   const Icon = Icons[iconName] as React.ComponentType<{ className?: string }>
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      onClick={onSelect}
-      className={cn(
-        'group relative rounded-lg border bg-card p-4 transition-all hover:shadow-md cursor-pointer',
-        isActive && 'border-primary shadow-md ring-2 ring-primary/20',
-        isDragging && 'shadow-lg'
+    <div className="relative">
+      {/* Drop Indicator */}
+      {isOver && (
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          className="absolute -top-2 left-0 right-0 h-1 bg-primary rounded-full shadow-lg"
+          style={{ originX: 0.5 }}
+        />
       )}
-    >
+
+      <div
+        ref={setNodeRef}
+        style={style}
+        onClick={onSelect}
+        className={cn(
+          'group relative rounded-lg border bg-card p-4 transition-all hover:shadow-md cursor-pointer',
+          isActive && 'border-primary shadow-md ring-2 ring-primary/20',
+          isDragging && 'shadow-xl scale-105 border-primary'
+        )}
+      >
       {/* Drag Handle */}
       <div
         {...attributes}
@@ -141,6 +154,7 @@ export function FieldItem({
           </div>
         )}
       </div>
+    </div>
     </div>
   )
 }

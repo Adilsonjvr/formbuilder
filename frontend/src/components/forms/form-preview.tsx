@@ -27,6 +27,8 @@ export function FormPreview({ open, onClose, formState }: FormPreviewProps) {
   const [previewData, setPreviewData] = useState<Record<string, unknown>>({})
 
   const sortedFields = [...formState.fields].sort((a, b) => a.order - b.order)
+  const primaryColor = formState.primaryColor || '#3b82f6'
+  const accentColor = formState.accentColor || '#8b5cf6'
 
   const handleFieldChange = (fieldId: string, value: unknown) => {
     setPreviewData((prev) => ({ ...prev, [fieldId]: value }))
@@ -49,7 +51,12 @@ export function FormPreview({ open, onClose, formState }: FormPreviewProps) {
           </Button>
         </DialogHeader>
 
-        <div className="p-8 bg-muted/30">
+        <div
+          className="p-8"
+          style={{
+            background: `linear-gradient(to bottom, transparent, ${primaryColor}10)`
+          }}
+        >
           <motion.div
             variants={fadeIn}
             initial="initial"
@@ -98,6 +105,7 @@ export function FormPreview({ open, onClose, formState }: FormPreviewProps) {
                       className="w-full"
                       size="lg"
                       disabled
+                      style={{ backgroundColor: primaryColor }}
                     >
                       Enviar
                     </Button>
