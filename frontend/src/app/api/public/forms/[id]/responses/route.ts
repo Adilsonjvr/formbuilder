@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma, { ensureResponseMetadataColumn } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import logger from '@/lib/logger';
 import { Prisma } from '@prisma/client';
 import { sanitizeRequiredString } from '@/lib/sanitize';
@@ -91,7 +91,6 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await ensureResponseMetadataColumn()
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
 
     if (!checkRateLimit(ip)) {
