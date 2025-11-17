@@ -18,13 +18,12 @@ const SECURITY_HEADERS: Record<string, string> = {
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: blob:",
     "form-action 'self'",
-    "frame-ancestors 'none'",
+    "frame-ancestors *",
     "base-uri 'self'",
   ].join('; '),
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
   'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
 }
 

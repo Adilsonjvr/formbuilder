@@ -319,10 +319,6 @@ Abra o DevTools do browser no frontend e verifique se não há erros de CORS ao 
           "value": "nosniff"
         },
         {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
         }
