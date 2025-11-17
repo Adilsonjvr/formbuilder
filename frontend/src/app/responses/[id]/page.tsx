@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { toast } from 'sonner'
 import { sanitizeText } from '@/lib/sanitize'
 import { ResponseAnalytics } from '@/components/analytics/response-analytics'
+import { exportResponsesToPDF } from '@/lib/pdf-export'
 
 interface FormField {
   id: string
@@ -226,8 +227,23 @@ export default function ResponsesPage({ params }: PageProps) {
     })
   }
 
-  const handleExport = async (format: 'csv' | 'json') => {
+  const handleExport = async (format: 'csv' | 'json' | 'pdf') => {
     try {
+      if (format === 'pdf') {
+        if (!formData || !responsesData?.items || responsesData.items.length === 0) {
+          toast.error('Nenhuma resposta para exportar')
+          return
+        }
+
+        await exportResponsesToPDF(
+          formData.name,
+          formData.fields.map(f => ({ id: f.id, label: f.label })),
+          responsesData.items
+        )
+        toast.success('PDF gerado com sucesso!')
+        return
+      }
+
       const response = await fetch(`/api/forms/${id}/export?format=${format}`, {
         credentials: 'include',
       })
@@ -245,8 +261,10 @@ export default function ResponsesPage({ params }: PageProps) {
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
+      toast.success(`${format.toUpperCase()} exportado com sucesso!`)
     } catch (error) {
       console.error('Export error:', error)
+      toast.error('Erro ao exportar')
     }
   }
 
@@ -355,7 +373,7 @@ export default function ResponsesPage({ params }: PageProps) {
         <Card className="md:col-span-2">
           <CardHeader className="pb-3">
             <CardDescription>Exportar Respostas</CardDescription>
-            <div className="flex gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -364,7 +382,7 @@ export default function ResponsesPage({ params }: PageProps) {
                 className="gap-2"
               >
                 <Download className="h-4 w-4" />
-                Exportar CSV
+                CSV
               </Button>
               <Button
                 variant="outline"
@@ -374,7 +392,17 @@ export default function ResponsesPage({ params }: PageProps) {
                 className="gap-2"
               >
                 <Download className="h-4 w-4" />
-                Exportar JSON
+                JSON
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport('pdf')}
+                disabled={!responsesData?.items || responsesData.items.length === 0}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                PDF
               </Button>
             </div>
           </CardHeader>

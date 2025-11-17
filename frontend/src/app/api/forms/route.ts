@@ -20,12 +20,17 @@ export async function POST(req: NextRequest) {
 
     const sanitizedName = sanitizeRequiredString(validation.data.name);
     const sanitizedDescription = sanitizeNullableString(validation.data.description);
+    const sanitizedEmail = validation.data.notificationEmail
+      ? sanitizeNullableString(validation.data.notificationEmail)
+      : null;
 
     const form = await prisma.form.create({
       data: {
         name: sanitizedName,
         description: sanitizedDescription,
         userId: user.id,
+        enableNotifications: validation.data.enableNotifications || false,
+        notificationEmail: sanitizedEmail,
       },
     });
 

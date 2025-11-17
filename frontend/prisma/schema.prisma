@@ -20,16 +20,18 @@ model User {
 }
 
 model Form {
-  id          String        @id @default(uuid())
-  user        User          @relation(fields: [userId], references: [id])
-  userId      String        @map("user_id")
-  name        String
-  description String?
-  fields      FormField[]
-  responses   FormResponse[]
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  deletedAt   DateTime?     @map("deleted_at")
+  id                   String        @id @default(uuid())
+  user                 User          @relation(fields: [userId], references: [id])
+  userId               String        @map("user_id")
+  name                 String
+  description          String?
+  fields               FormField[]
+  responses            FormResponse[]
+  enableNotifications  Boolean       @default(false) @map("enable_notifications")
+  notificationEmail    String?       @map("notification_email")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+  deletedAt            DateTime?     @map("deleted_at")
 
   @@index([userId])
   @@index([createdAt])

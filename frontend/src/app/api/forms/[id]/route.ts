@@ -63,6 +63,8 @@ export async function GET(
       description: form.description,
       fields,
       isPublic: false,
+      enableNotifications: form.enableNotifications,
+      notificationEmail: form.notificationEmail,
       createdAt: form.createdAt,
       stats,
     });
@@ -88,6 +90,10 @@ export async function PUT(
     const sanitizedName = body.name ? sanitizeRequiredString(body.name) : undefined;
     const sanitizedDescription =
       body.description !== undefined ? sanitizeNullableString(body.description) : undefined;
+    const sanitizedEmail =
+      body.notificationEmail !== undefined
+        ? sanitizeNullableString(body.notificationEmail)
+        : undefined;
 
     const form = await prisma.form.findFirst({
       where: { id, userId: user.id, deletedAt: null },
@@ -103,6 +109,11 @@ export async function PUT(
         name: sanitizedName ?? form.name,
         description:
           sanitizedDescription !== undefined ? sanitizedDescription : form.description,
+        enableNotifications:
+          body.enableNotifications !== undefined
+            ? body.enableNotifications
+            : form.enableNotifications,
+        notificationEmail: sanitizedEmail !== undefined ? sanitizedEmail : form.notificationEmail,
       },
     });
 

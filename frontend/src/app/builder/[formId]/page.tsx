@@ -28,6 +28,8 @@ interface BuilderFormResponse {
   name: string
   description: string | null
   fields: BuilderFormField[]
+  enableNotifications: boolean
+  notificationEmail: string | null
 }
 
 interface PageProps {
@@ -62,6 +64,8 @@ export default function BuilderPage({ params }: PageProps) {
           body: JSON.stringify({
             name: state.name,
             description: state.description,
+            enableNotifications: state.enableNotifications,
+            notificationEmail: state.notificationEmail || null,
           }),
         })
 
@@ -101,6 +105,8 @@ export default function BuilderPage({ params }: PageProps) {
           body: JSON.stringify({
             name: state.name,
             description: state.description,
+            enableNotifications: state.enableNotifications,
+            notificationEmail: state.notificationEmail || null,
           }),
         })
 
@@ -212,6 +218,8 @@ export default function BuilderPage({ params }: PageProps) {
         formId: formData?.id,
         name: formData?.name || '',
         description: formData?.description || '',
+        enableNotifications: formData?.enableNotifications || false,
+        notificationEmail: formData?.notificationEmail || '',
         fields: (formData?.fields || []).map((field): FormField => ({
           id: field.id,
           type: field.type,

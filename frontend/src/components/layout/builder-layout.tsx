@@ -20,6 +20,7 @@ import { FieldPalette } from '@/components/forms/field-palette'
 import { FieldBuilder } from '@/components/forms/field-builder'
 import { FieldSettings } from '@/components/forms/field-settings'
 import { FormPreview } from '@/components/forms/form-preview'
+import { FormSettingsDialog } from '@/components/forms/form-settings-dialog'
 import { useFormBuilder } from '@/hooks/use-form-builder'
 import { FormBuilderState } from '@/types/form-builder'
 import { FieldType } from '@/lib/constants'
@@ -131,6 +132,11 @@ export function BuilderLayout({ initialState, onSave }: BuilderLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2">
+            <FormSettingsDialog
+              enableNotifications={state.enableNotifications}
+              notificationEmail={state.notificationEmail}
+              onUpdate={updateFormInfo}
+            />
             <Button
               variant="outline"
               size="sm"

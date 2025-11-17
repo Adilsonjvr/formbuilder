@@ -12,10 +12,12 @@ export function useFormBuilder(initialState?: Partial<FormBuilderState>) {
     fields: initialState?.fields || [],
     activeFieldId: initialState?.activeFieldId || null,
     formId: initialState?.formId,
+    enableNotifications: initialState?.enableNotifications || false,
+    notificationEmail: initialState?.notificationEmail || '',
   })
 
   const updateFormInfo = useCallback(
-    (updates: { name?: string; description?: string }) => {
+    (updates: { name?: string; description?: string; enableNotifications?: boolean; notificationEmail?: string }) => {
       setState((prev) => ({ ...prev, ...updates }))
     },
     []

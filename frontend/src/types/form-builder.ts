@@ -24,6 +24,8 @@ export interface FormBuilderState {
   description: string
   fields: FormField[]
   activeFieldId: string | null
+  enableNotifications: boolean
+  notificationEmail: string
 }
 
 export interface DragItem {

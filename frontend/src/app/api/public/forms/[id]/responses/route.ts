@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import logger from '@/lib/logger';
 import { Prisma } from '@prisma/client';
 import { sanitizeRequiredString } from '@/lib/sanitize';
+import { sendResponseNotification } from '@/lib/email';
 
 type SubmittedField = {
   fieldId: string
@@ -111,6 +112,11 @@ export async function POST(
 
     const form = await prisma.form.findFirst({
       where: { id: formId, deletedAt: null },
+      include: {
+        fields: {
+          orderBy: { order: 'asc' },
+        },
+      },
     });
 
     if (!form) {
@@ -140,6 +146,27 @@ export async function POST(
     });
 
     logger.info('response_submitted', { formId, responseId: response.id });
+
+    // Send email notification if enabled
+    if (form.enableNotifications && form.notificationEmail) {
+      // Send email asynchronously without blocking the response
+      sendResponseNotification(form.notificationEmail, {
+        formName: form.name,
+        formId: form.id,
+        responseId: response.id,
+        fields: form.fields.map((f) => ({
+          id: f.id,
+          label: f.label,
+          type: f.type,
+        })),
+        responseData: submittedFields,
+        submittedAt: response.createdAt.toISOString(),
+        ip: response.ip,
+      }).catch((error) => {
+        // Log error but don't fail the response
+        console.error('Failed to send email notification:', error);
+      });
+    }
 
     return NextResponse.json({ id: response.id }, { status: 201 });
   } catch (error) {
